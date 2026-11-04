@@ -174,7 +174,8 @@ export class NeonRushScene extends Phaser.Scene {
 
     for (const object of this.objects) {
       const perspective = Phaser.Math.Clamp(object.x / 1010, 0, 1);
-      const x = 480 + (object.lane - 1) * (22 + perspective * 125);
+      const targetX = [342, 480, 618][object.lane];
+      const x = 480 + (targetX - 480) * (1 - perspective);
       const y = 440 - perspective * 285;
       if (object.kind === "coin") {
         g.fillStyle(0xffd66f, 1);
