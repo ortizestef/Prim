@@ -266,6 +266,5 @@ function SettingsPage({ profile, setProfile }: { profile: PlayerProfile; setProf
 }
 
 export default function App() {
-  const basePath = import.meta.env.BASE_URL === "/Prim/" ? "/Prim" : "/";
-  return <HashRouter basename={basePath}><AppShell /></HashRouter>;
+  return <HashRouter><AppShell /></HashRouter>;
 }
