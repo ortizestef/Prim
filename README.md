@@ -31,7 +31,7 @@ Vite is configured for this repository path: /Prim/.
 npm run build
 ~~~
 
-Publish the generated dist directory using GitHub Pages. The app uses hash-based navigation so nested screens also work when hosted on GitHub Pages. Enable GitHub Pages with the GitHub Actions source before deploying. For another repository name, update the base path in vite.config.ts.
+To publish, open repository Settings → Pages and select GitHub Actions as the source. Then open Actions → Publish GitHub Pages → Run workflow. The workflow builds the app, runs its tests and publishes the dist directory. The app uses hash-based navigation so nested screens work on GitHub Pages. For another repository name, update the base path in vite.config.ts.
 
 ## Project structure
 
