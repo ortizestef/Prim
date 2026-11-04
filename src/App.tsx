@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
-import { BrowserRouter, NavLink, Route, Routes, useNavigate, useParams } from "react-router-dom";
+import { HashRouter, NavLink, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import PhaserGame from "./components/PhaserGame";
 import { ACHIEVEMENTS, applyRun, getLevelProgress, currentLevel } from "./lib/progression";
 import { loadProfile, saveProfile, xpToNextLevel } from "./lib/storage";
@@ -252,7 +252,7 @@ function MissionsPage({ profile }: { profile: PlayerProfile }) {
     { title: "Getting warmed up", detail: "Play 3 game sessions.", progress: Math.min(profile.gamesPlayed, 3), target: 3, reward: "100 XP" },
     { title: "Pocket change", detail: "Hold 50 coins in your wallet.", progress: Math.min(profile.coins, 50), target: 50, reward: "75 XP" },
   ], [profile.gamesPlayed, profile.coins]);
-  return <div className="content-page"><SectionHeading eyebrow="OBJECTIVES / PLAYER MISSIONS" title="THE NEXT MILESTONE" detail="Small goals. New reasons to jump back in." /><div className="mission-list">{missions.map((mission) => <div className="mission-card" key={mission.title}><div className="mission-symbol">✧</div><div className="mission-copy"><span className="eyebrow">GENERAL CHALLENGE</span><h3>{mission.title}</h3><p>{mission.detail}</p><div className="progress-track"><i style={{ width: (mission.progress / mission.target * 100) + "%" }} /></div><small>{mission.progress} / {mission.target} COMPLETE</small></div><div className="mission-reward"><small>REWARD</small><b>{mission.reward}</b></div></div>)}</div><p className="subtle-note">Mission progress updates from your saved profile. Daily and weekly rotations are planned for a future update.</p></div>;
+  return <div className="content-page"><SectionHeading eyebrow="OBJECTIVES / PLAYER MISSIONS" title="THE NEXT MILESTONE" detail="Small goals. New reasons to jump back in." /><div className="mission-list">{missions.map((mission) => <div className="mission-card" key={mission.title}><div className="mission-symbol">✧</div><div className="mission-copy"><span className="eyebrow">GENERAL CHALLENGE</span><h3>{mission.title}</h3><p>{mission.detail}</p><div className="progress-track"><i style={{ width: (mission.progress / mission.target * 100) + "%" }} /></div><small>{mission.progress} / {mission.target} COMPLETE</small></div><div className="mission-reward"><small>GOAL REWARD</small><b>{mission.reward}</b></div></div>)}</div><p className="subtle-note">Mission cards currently track progress only; rewards are not claimable yet. Daily and weekly rotations are planned for a future update.</p></div>;
 }
 
 function AchievementsPage({ profile }: { profile: PlayerProfile }) {
@@ -267,5 +267,5 @@ function SettingsPage({ profile, setProfile }: { profile: PlayerProfile; setProf
 
 export default function App() {
   const basePath = import.meta.env.BASE_URL === "/Prim/" ? "/Prim" : "/";
-  return <BrowserRouter basename={basePath}><AppShell /></BrowserRouter>;
+  return <HashRouter basename={basePath}><AppShell /></HashRouter>;
 }

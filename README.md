@@ -31,7 +31,7 @@ Vite is configured for this repository path: /Prim/.
 npm run build
 ~~~
 
-Publish the generated dist directory using GitHub Pages. GitHub Actions artifact deployment is recommended. For another repository name, update the base path in vite.config.ts.
+Publish the generated dist directory using GitHub Pages. The app uses hash-based navigation so nested screens also work when hosted on GitHub Pages. Enable GitHub Pages with the GitHub Actions source before deploying. For another repository name, update the base path in vite.config.ts.
 
 ## Project structure
 
@@ -59,4 +59,4 @@ Progress is saved in this browser using localStorage. It is local to the current
 
 ## Current limitations
 
-This is the initial playable foundation, not the full feature set described in the product brief. Daily/weekly mission rotation, online services, cosmetic inventory that changes in-game appearance, full audio, additional environments, all requested game modes and deployment automation remain future work. Settings are persisted; sound playback is not yet connected.
+This is the initial playable foundation, not the full feature set described in the product brief. Daily/weekly mission rotation and claimable rewards, online services, cosmetic inventory that changes in-game appearance, full audio, additional environments, all requested game modes and deployment automation remain future work. Local personal bests are stored per game; no global leaderboard exists. Settings are persisted; sound playback is not yet connected.
