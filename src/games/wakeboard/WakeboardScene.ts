@@ -180,14 +180,15 @@ export class WakeboardScene extends Phaser.Scene {
       g.strokePath();
     }
     // Motorboat and wake
+    const boatX = 790 + Math.sin(this.elapsed * 1.2) * 16;
     g.fillStyle(0xbaf8f2, 0.25);
-    g.fillEllipse(725, 150, 300, 46);
+    g.fillEllipse(boatX - 55, 150, 300, 46);
     g.fillStyle(0xf5fbf7, 1);
-    g.fillRoundedRect(780, 105, 115, 44, 13);
+    g.fillRoundedRect(boatX - 10, 105, 115, 44, 13);
     g.fillStyle(0x15384a, 1);
-    g.fillRoundedRect(814, 88, 45, 22, 7);
+    g.fillRoundedRect(boatX + 24, 88, 45, 22, 7);
     g.fillStyle(0xffd36e, 1);
-    g.fillCircle(896, 126, 5);
+    g.fillCircle(boatX + 106, 126, 5);
 
     for (const hazard of this.hazards) {
       if (hazard.kind === "buoy") {

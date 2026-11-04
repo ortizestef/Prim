@@ -76,10 +76,12 @@ export class NeonRushScene extends Phaser.Scene {
   }
 
   private spawnObject(kind?: TrackObject["kind"]): void {
+    const roll = Math.random();
+    const nextKind = kind ?? (roll > 0.94 ? "power" : roll > 0.66 ? "coin" : "barrier");
     this.objects.push({
       x: 1010,
       lane: Phaser.Math.Between(0, 2),
-      kind: kind ?? (Math.random() > 0.73 ? "coin" : "barrier"),
+      kind: nextKind,
     });
   }
 
@@ -117,8 +119,17 @@ export class NeonRushScene extends Phaser.Scene {
           this.score += 45;
           this.status.setText("+1 DATA CHIP");
         } else if (object.kind === "power") {
-          this.shieldUntil = this.time.now + 5000;
-          this.status.setText("SHIELD ONLINE");
+          const powerRoll = Math.random();
+          if (powerRoll < 0.34) {
+            this.shieldUntil = this.time.now + 5000;
+            this.status.setText("SHIELD ONLINE");
+          } else if (powerRoll < 0.67) {
+            this.magnetUntil = this.time.now + 5000;
+            this.status.setText("COIN MAGNET ONLINE");
+          } else {
+            this.speedBoostUntil = this.time.now + 3500;
+            this.status.setText("SPEED BOOST ONLINE");
+          }
         } else if (this.time.now > this.jumpUntil && this.time.now > this.shieldUntil) {
           this.finish();
           return;
@@ -127,14 +138,12 @@ export class NeonRushScene extends Phaser.Scene {
           this.status.setText("DODGED!");
         }
       }
-      if (object.kind === "coin" && this.time.now < this.magnetUntil && object.x < 450 && object.lane === this.lane) {
+      if (!object.passed && object.kind === "coin" && this.time.now < this.magnetUntil && object.x < 450 && object.lane === this.lane) {
         object.x = 180;
       }
     }
     this.objects = this.objects.filter((object) => object.x > -70);
     this.score += delta / 1000 * (16 + this.elapsed * 0.9);
-    if (this.elapsed > 12 && Math.random() < 0.004) this.magnetUntil = this.time.now + 3000;
-    if (this.elapsed > 18 && Math.random() < 0.002) this.speedBoostUntil = this.time.now + 2500;
     this.drawWorld();
     const power = this.time.now < this.shieldUntil ? "SHIELD" : this.time.now < this.speedBoostUntil ? "BOOST" : this.time.now < this.magnetUntil ? "MAGNET" : "";
     this.hud.setText("SCORE  " + Math.floor(this.score) + "     DATA CHIPS  " + this.coins + "     SPEED  " + (1 + this.elapsed / 30).toFixed(1) + "x     " + power);
