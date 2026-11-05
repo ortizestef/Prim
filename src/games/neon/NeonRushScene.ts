@@ -28,8 +28,19 @@ export class NeonRushScene extends Phaser.Scene {
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   private stripeOffset = 0;
 
-  constructor() {
+  constructor(
+    private readonly equippedItem: string | null = null,
+    private readonly controlScheme: "arrows" | "wasd" = "arrows",
+  ) {
     super("NeonRushScene");
+  }
+
+  public touchLane(direction: number): void {
+    this.changeLane(direction);
+  }
+
+  public touchJump(): void {
+    this.jump();
   }
 
   create(): void {
@@ -95,10 +106,13 @@ export class NeonRushScene extends Phaser.Scene {
 
     this.elapsed += delta / 1000;
     this.stripeOffset = (this.stripeOffset + delta * 0.42) % 100;
-    if (this.cursors?.left && Phaser.Input.Keyboard.JustDown(this.cursors.left)) this.changeLane(-1);
-    else if (this.keys?.A && Phaser.Input.Keyboard.JustDown(this.keys.A)) this.changeLane(-1);
-    if (this.cursors?.right && Phaser.Input.Keyboard.JustDown(this.cursors.right)) this.changeLane(1);
-    else if (this.keys?.D && Phaser.Input.Keyboard.JustDown(this.keys.D)) this.changeLane(1);
+    if (this.controlScheme === "arrows") {
+      if (this.cursors?.left && Phaser.Input.Keyboard.JustDown(this.cursors.left)) this.changeLane(-1);
+      if (this.cursors?.right && Phaser.Input.Keyboard.JustDown(this.cursors.right)) this.changeLane(1);
+    } else {
+      if (this.keys?.A && Phaser.Input.Keyboard.JustDown(this.keys.A)) this.changeLane(-1);
+      if (this.keys?.D && Phaser.Input.Keyboard.JustDown(this.keys.D)) this.changeLane(1);
+    }
     if (this.keys?.SPACE && Phaser.Input.Keyboard.JustDown(this.keys.SPACE)) this.jump();
 
     const boost = this.time.now < this.speedBoostUntil ? 1.45 : 1;
@@ -202,7 +216,17 @@ export class NeonRushScene extends Phaser.Scene {
       g.lineStyle(4, 0x86b8ff, 0.9);
       g.strokeCircle(x, 400 - lift, 42);
     }
-    g.fillStyle(0x7af7ff, 1);
+    const runnerColor = this.equippedItem === "synth-glow"
+      ? 0xff70d2
+      : this.equippedItem === "pixel-wings"
+        ? 0xb6a4ff
+        : 0x7af7ff;
+    if (this.equippedItem === "pixel-wings") {
+      g.fillStyle(0xf19bff, 0.9);
+      g.fillTriangle(x - 10, 389 - lift, x - 45, 377 - lift, x - 24, 414 - lift);
+      g.fillTriangle(x + 10, 389 - lift, x + 45, 377 - lift, x + 24, 414 - lift);
+    }
+    g.fillStyle(runnerColor, 1);
     g.fillTriangle(x, 347 - lift, x - 25, 414 - lift, x + 25, 414 - lift);
     g.fillStyle(0xf9f5ff, 1);
     g.fillCircle(x, 369 - lift, 12);

@@ -49,9 +49,9 @@ src/
 
 ## Current gameplay
 
-- **WAKEBOARD X:** keyboard and pointer movement, jump/trick timing, ramps, buoys, combo scoring and landing rewards.
-- **NEON RUSH:** three-lane runner, lane switching, jumping, collectible data chips, increasing speed and collision/game-over logic.
-- Both games save completed-run XP, coins, achievements, mission progress and personal bests to the same local player profile. Daily and weekly missions award XP and coins once each when claimed.
+- **WAKEBOARD X:** configurable arrow-key/WASD steering, touch movement buttons, jump/trick timing, ramps, buoys, combo scoring, landing rewards and equipable board cosmetics.
+- **NEON RUSH:** configurable lane controls, mobile touch buttons, jumping, collectible data chips, power-ups, increasing speed, collision/game-over logic and equipable runner cosmetics.
+- Both games save completed-run XP, coins, achievements, mission progress and personal bests to the same local player profile. Daily and weekly missions award XP and coins once each when claimed. Owned cosmetic items can be equipped for their matching game.
 
 ## Persistence and privacy
 

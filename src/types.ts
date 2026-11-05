@@ -44,6 +44,7 @@ export interface PlayerProfile {
   bestScores: Record<GameId, number>;
   achievements: string[];
   ownedItems: string[];
+  equippedItems: Partial<Record<GameId, string>>;
   missionProgress: MissionProgressState;
   settings: PlayerSettings;
 }
@@ -68,6 +69,7 @@ export const DEFAULT_PROFILE: PlayerProfile = {
   bestScores: { "wakeboard-x": 0, "neon-rush": 0 },
   achievements: [],
   ownedItems: [],
+  equippedItems: {},
   missionProgress: {
     dailyKey: "",
     weeklyKey: "",

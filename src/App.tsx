@@ -30,10 +30,10 @@ const games = [
 ];
 
 const shopItems = [
-  { id: "aqua-trail", name: "Aqua Trail", category: "WAKEBOARD X", price: 120, symbol: "〰" },
-  { id: "solar-board", name: "Solar Board", category: "WAKEBOARD X", price: 180, symbol: "▱" },
-  { id: "synth-glow", name: "Synth Glow", category: "NEON RUSH", price: 150, symbol: "✦" },
-  { id: "pixel-wings", name: "Pixel Wings", category: "NEON RUSH", price: 220, symbol: "⌁" },
+  { id: "aqua-trail", name: "Aqua Trail", category: "WAKEBOARD X", gameId: "wakeboard-x" as const, price: 120, symbol: "〰" },
+  { id: "solar-board", name: "Solar Board", category: "WAKEBOARD X", gameId: "wakeboard-x" as const, price: 180, symbol: "▱" },
+  { id: "synth-glow", name: "Synth Glow", category: "NEON RUSH", gameId: "neon-rush" as const, price: 150, symbol: "✦" },
+  { id: "pixel-wings", name: "Pixel Wings", category: "NEON RUSH", gameId: "neon-rush" as const, price: 220, symbol: "⌁" },
 ];
 
 function AppShell() {
@@ -62,18 +62,30 @@ function AppShell() {
     });
   };
 
-  const buyItem = (id: string, price: number) => {
+  const buyItem = (id: string, price: number, gameId: GameId) => {
     setProfile((current) => {
       if (current.ownedItems.includes(id)) {
-        notify("Already in your collection.");
-        return current;
+        const isEquipped = current.equippedItems[gameId] === id;
+        notify(isEquipped ? "Cosmetic unequipped." : "Cosmetic equipped!");
+        return {
+          ...current,
+          equippedItems: {
+            ...current.equippedItems,
+            [gameId]: isEquipped ? undefined : id,
+          },
+        };
       }
       if (current.coins < price) {
         notify("Not enough coins yet. Play a run to earn more.");
         return current;
       }
-      notify("Item unlocked!");
-      return { ...current, coins: current.coins - price, ownedItems: [...current.ownedItems, id] };
+      notify("Item unlocked and equipped!");
+      return {
+        ...current,
+        coins: current.coins - price,
+        ownedItems: [...current.ownedItems, id],
+        equippedItems: { ...current.equippedItems, [gameId]: id },
+      };
     });
   };
 
@@ -226,7 +238,7 @@ function PlayPage({ onFinish, profile }: { onFinish: (result: RunResult) => void
     <div className="play-page">
       <div className="play-topline"><button className="back-link" onClick={() => navigate("/library")}>← GAME LIBRARY</button><span className="eyebrow">ARCADE SESSION / {selected.id === "wakeboard-x" ? "01" : "02"}</span><span className="play-wallet">◈ {profile.coins} COINS</span></div>
       <div className={"play-heading " + selected.color}><div><span className="eyebrow">{selected.genre}</span><h1>{selected.name}</h1><p>{selected.description}</p></div><span className="session-badge"><i /> SESSION READY</span></div>
-      <div className="game-stage"><PhaserGame key={selected.id + "-" + session} gameId={selected.id as GameId} onFinish={handleFinish} />
+      <div className="game-stage"><PhaserGame key={selected.id + "-" + session + "-" + (profile.equippedItems[selected.id] ?? "default")} gameId={selected.id as GameId} onFinish={handleFinish} equippedItem={profile.equippedItems[selected.id] ?? null} controlScheme={profile.settings.controlScheme} />
         {finished && lastResult && <div className="result-overlay"><div className="result-panel"><span className="eyebrow">SESSION COMPLETE</span><h2>RUN IT BACK.</h2><div className="result-score">{lastResult.score.toLocaleString()}<small>POINTS</small></div><div className="result-rewards"><span>+{Math.max(20, Math.floor(lastResult.score / 8))} XP</span><span>+{lastResult.coins + Math.floor(lastResult.score / 180)} COINS</span></div><button className="button button-primary" onClick={replay}>PLAY AGAIN ↗</button><button className="button button-quiet" onClick={() => navigate("/profile")}>VIEW PROGRESS</button></div></div>}
       </div>
       <div className="controls-line"><span>⌨ CONTROLS</span><p>{selected.controls}</p><span>ESC TO PAUSE</span></div>
@@ -251,8 +263,35 @@ function StatBox({ label, value }: { label: string; value: string }) {
   return <div className="profile-stat"><span>{label}</span><b>{value}</b></div>;
 }
 
-function ShopPage({ profile, buyItem }: { profile: PlayerProfile; buyItem: (id: string, price: number) => void }) {
-  return <div className="content-page"><SectionHeading eyebrow="ARCADE STORE / COSMETICS" title="MAKE IT YOURS" detail="A little style goes a long way. Every item is earned with in-game coins." /><div className="shop-wallet"><span>YOUR BALANCE</span><b>◈ {profile.coins}</b></div><div className="shop-grid">{shopItems.map((item) => { const owned = profile.ownedItems.includes(item.id); return <article className="shop-item" key={item.id}><div className="shop-art"><span>{item.symbol}</span><small>{item.category}</small></div><div className="shop-item-info"><div><h3>{item.name}</h3><span>{item.price} COINS</span></div><button className={"button " + (owned ? "button-owned" : "button-outline")} disabled={owned} onClick={() => buyItem(item.id, item.price)}>{owned ? "OWNED ✓" : "UNLOCK"}</button></div></article>; })}</div><p className="subtle-note">Cosmetic inventory is saved locally. No real-money purchases.</p></div>;
+function ShopPage({ profile, buyItem }: { profile: PlayerProfile; buyItem: (id: string, price: number, gameId: GameId) => void }) {
+  return (
+    <div className="content-page">
+      <SectionHeading eyebrow="ARCADE STORE / COSMETICS" title="MAKE IT YOURS" detail="Unlock each look with coins earned in-game, then equip it to change your next run." />
+      <div className="shop-wallet"><span>YOUR BALANCE</span><b>◈ {profile.coins}</b></div>
+      <div className="shop-grid">
+        {shopItems.map((item) => {
+          const owned = profile.ownedItems.includes(item.id);
+          const equipped = profile.equippedItems[item.gameId] === item.id;
+          return (
+            <article className="shop-item" key={item.id}>
+              <div className="shop-art"><span>{item.symbol}</span><small>{item.category}</small></div>
+              <div className="shop-item-info">
+                <div><h3>{item.name}</h3><span>{item.price} COINS</span></div>
+                <button
+                  className={"button " + (equipped ? "button-owned" : "button-outline")}
+                  disabled={equipped}
+                  onClick={() => buyItem(item.id, item.price, item.gameId)}
+                >
+                  {equipped ? "EQUIPPED ✓" : owned ? "EQUIP" : "UNLOCK"}
+                </button>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+      <p className="subtle-note">Your equipped look appears inside its game. Cosmetics are saved locally and can be changed without losing progress.</p>
+    </div>
+  );
 }
 
 function MissionsPage({ profile, onClaim }: { profile: PlayerProfile; onClaim: (claimId: string) => void }) {

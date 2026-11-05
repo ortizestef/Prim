@@ -31,8 +31,27 @@ export class WakeboardScene extends Phaser.Scene {
   private spawnClock = 0;
   private waveOffset = 0;
 
-  constructor() {
+  constructor(
+    private readonly equippedItem: string | null = null,
+    private readonly controlScheme: "arrows" | "wasd" = "arrows",
+  ) {
     super("WakeboardScene");
+  }
+
+  public moveBy(dx: number, dy: number): void {
+    if (this.ended || this.paused) return;
+    this.playerX = Phaser.Math.Clamp(this.playerX + dx, 90, 455);
+    this.playerY = Phaser.Math.Clamp(this.playerY + dy, 170, 435);
+  }
+
+  public touchJump(): void {
+    this.jump();
+  }
+
+  public touchTrick(kind: "spin180" | "spin360"): void {
+    if (!this.jumping || this.ended || this.paused) return;
+    this.trickUntil = this.time.now + (kind === "spin180" ? 350 : 450);
+    this.status.setText(kind === "spin180" ? "180° SPIN!" : "360° SPIN!");
   }
 
   create(): void {
@@ -94,10 +113,10 @@ export class WakeboardScene extends Phaser.Scene {
     this.elapsed += delta / 1000;
     this.waveOffset += delta * 0.035;
     const speed = 280 + this.elapsed * 5.2;
-    const left = this.cursors?.left?.isDown || this.keys?.A?.isDown;
-    const right = this.cursors?.right?.isDown || this.keys?.D?.isDown;
-    const up = this.cursors?.up?.isDown || this.keys?.W?.isDown;
-    const down = this.cursors?.down?.isDown || this.keys?.S?.isDown;
+    const left = this.controlScheme === "arrows" ? this.cursors?.left?.isDown : this.keys?.A?.isDown;
+    const right = this.controlScheme === "arrows" ? this.cursors?.right?.isDown : this.keys?.D?.isDown;
+    const up = this.controlScheme === "arrows" ? this.cursors?.up?.isDown : this.keys?.W?.isDown;
+    const down = this.controlScheme === "arrows" ? this.cursors?.down?.isDown : this.keys?.S?.isDown;
     if (left) this.playerX -= delta * 0.3;
     if (right) this.playerX += delta * 0.3;
     if (up) this.playerY -= delta * 0.3;
@@ -106,14 +125,8 @@ export class WakeboardScene extends Phaser.Scene {
     this.playerY = Phaser.Math.Clamp(this.playerY, 170, 435);
 
     if (this.keys?.SPACE && Phaser.Input.Keyboard.JustDown(this.keys.SPACE)) this.jump();
-    if (this.jumping && this.keys?.Z && Phaser.Input.Keyboard.JustDown(this.keys.Z)) {
-      this.trickUntil = this.time.now + 350;
-      this.status.setText("180° SPIN!");
-    }
-    if (this.jumping && this.keys?.X && Phaser.Input.Keyboard.JustDown(this.keys.X)) {
-      this.trickUntil = this.time.now + 450;
-      this.status.setText("360° SPIN!");
-    }
+    if (this.jumping && this.keys?.Z && Phaser.Input.Keyboard.JustDown(this.keys.Z)) this.touchTrick("spin180");
+    if (this.jumping && this.keys?.X && Phaser.Input.Keyboard.JustDown(this.keys.X)) this.touchTrick("spin360");
 
     if (this.jumping && this.time.now >= this.jumpUntil) {
       this.jumping = false;
@@ -207,13 +220,18 @@ export class WakeboardScene extends Phaser.Scene {
     const lift = this.jumping ? Math.sin(Math.PI * Phaser.Math.Clamp((this.jumpUntil - this.time.now) / 680, 0, 1)) * 45 : 0;
     g.fillStyle(0x003c54, 0.3);
     g.fillEllipse(this.playerX + 8, this.playerY + 16, 60, 16);
-    g.fillStyle(0xffd36b, 1);
+    const boardColor = this.equippedItem === "aqua-trail"
+      ? 0x65f4df
+      : this.equippedItem === "solar-board"
+        ? 0xff9b58
+        : 0xffd36b;
+    g.fillStyle(boardColor, 1);
     g.fillRoundedRect(this.playerX - 30, this.playerY - 5 - lift, 62, 10, 5);
     g.fillStyle(0xf3fbff, 1);
     g.fillCircle(this.playerX, this.playerY - 25 - lift, 12);
     g.fillStyle(0x123f55, 1);
     g.fillRoundedRect(this.playerX - 10, this.playerY - 14 - lift, 20, 25, 7);
-    g.lineStyle(5, 0xffd36b, 1);
+    g.lineStyle(5, boardColor, 1);
     g.lineBetween(this.playerX - 7, this.playerY + 5 - lift, this.playerX - 19, this.playerY + 19 - lift);
     g.lineBetween(this.playerX + 7, this.playerY + 5 - lift, this.playerX + 18, this.playerY + 18 - lift);
   }

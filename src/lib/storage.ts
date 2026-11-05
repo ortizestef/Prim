@@ -32,6 +32,7 @@ export function loadProfile(): PlayerProfile {
       },
       achievements: Array.isArray(saved.achievements) ? saved.achievements : [],
       ownedItems: Array.isArray(saved.ownedItems) ? saved.ownedItems : [],
+      equippedItems: { ...DEFAULT_PROFILE.equippedItems, ...(saved.equippedItems ?? {}) },
     };
     return syncMissionWindows(merged);
   } catch {
