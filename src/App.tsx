@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { HashRouter, NavLink, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import PhaserGame from "./components/PhaserGame";
 import { ACHIEVEMENTS, applyRun, getLevelProgress, currentLevel } from "./lib/progression";
