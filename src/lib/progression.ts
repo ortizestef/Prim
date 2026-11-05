@@ -12,8 +12,8 @@ export const ACHIEVEMENTS = [
   { id: "neon-survivor", title: "Neon Survivor", detail: "Stay in NEON RUSH for 60 seconds.", reward: 150 },
 ] as const;
 
-export function applyRun(profile: PlayerProfile, result: RunResult): PlayerProfile {
-  const current = syncMissionWindows(profile);
+export function applyRun(profile: PlayerProfile, result: RunResult, now = new Date()): PlayerProfile {
+  const current = syncMissionWindows(profile, now);
   const gainedXp = Math.max(20, Math.floor(result.score / 8));
   const earnedCoins = Math.max(0, Math.floor(result.coins)) + Math.floor(Math.max(0, result.score) / 180);
   const bestScores = {

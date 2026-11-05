@@ -54,7 +54,7 @@ describe("daily and weekly missions", () => {
     const start = syncMissionWindows(structuredClone(DEFAULT_PROFILE), monday);
     const played = applyRun(start, {
       gameId: "neon-rush", score: 1800, coins: 8, duration: 35,
-    });
+    }, monday);
     const board = getMissionBoard(played, monday);
     expect(board.find((mission) => mission.id === "play-one")?.completed).toBe(true);
     expect(board.find((mission) => mission.id === "neon-chips")?.progress).toBe(8);
@@ -64,7 +64,7 @@ describe("daily and weekly missions", () => {
   it("allows a completed reward to be claimed only once", () => {
     const played = applyRun(structuredClone(DEFAULT_PROFILE), {
       gameId: "wakeboard-x", score: 600, coins: 0, tricks: 2, duration: 25,
-    });
+    }, monday);
     const mission = getMissionBoard(played, monday).find((item) => item.id === "play-one")!;
     const first = claimMissionReward(played, mission.claimId, monday);
     const second = claimMissionReward(first.profile, mission.claimId, monday);
