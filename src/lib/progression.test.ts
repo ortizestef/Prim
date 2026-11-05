@@ -69,7 +69,8 @@ describe("daily and weekly missions", () => {
     const first = claimMissionReward(played, mission.claimId, monday);
     const second = claimMissionReward(first.profile, mission.claimId, monday);
     expect(first.claimed).toBe(true);
-    expect(first.profile.xp).toBe( Math.max(20, Math.floor(600 / 8)) + 50 + 60 );
+    expect(first.profile.xp).toBe(Math.max(20, Math.floor(600 / 8)) + 60);
+    expect(first.profile.coins).toBe(73);
     expect(second.claimed).toBe(false);
     expect(second.profile.coins).toBe(first.profile.coins);
   });
