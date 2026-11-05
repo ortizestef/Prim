@@ -2,10 +2,11 @@ import { useEffect, useRef } from "react";
 import Phaser from "phaser";
 import { WakeboardScene } from "../games/wakeboard/WakeboardScene";
 import { NeonRushScene } from "../games/neon/NeonRushScene";
-import type { GameId, PlayerSettings, RunResult } from "../types";
+import type { GameId, GameMode, PlayerSettings, RunResult } from "../types";
 
 interface PhaserGameProps {
   gameId: GameId;
+  mode?: GameMode;
   onFinish: (result: RunResult) => void;
   equippedItem?: string | null;
   controlScheme?: PlayerSettings["controlScheme"];
@@ -13,6 +14,7 @@ interface PhaserGameProps {
 
 export default function PhaserGame({
   gameId,
+  mode = "classic",
   onFinish,
   equippedItem = null,
   controlScheme = "arrows",
@@ -25,8 +27,8 @@ export default function PhaserGame({
   useEffect(() => {
     if (!hostRef.current) return;
     const scene = gameId === "wakeboard-x"
-      ? new WakeboardScene(equippedItem, controlScheme)
-      : new NeonRushScene(equippedItem, controlScheme);
+      ? new WakeboardScene(equippedItem, controlScheme, mode)
+      : new NeonRushScene(equippedItem, controlScheme, mode);
     const game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: hostRef.current,
@@ -52,7 +54,7 @@ export default function PhaserGame({
       game.destroy(true);
       gameRef.current = null;
     };
-  }, [gameId, equippedItem, controlScheme]);
+  }, [gameId, mode, equippedItem, controlScheme]);
 
   const wakeAction = (action: "left" | "right" | "up" | "down" | "jump" | "spin180" | "spin360") => {
     const scene = gameRef.current?.scene.getScene("WakeboardScene") as WakeboardScene | undefined;

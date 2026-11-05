@@ -1,4 +1,5 @@
 export type GameId = "wakeboard-x" | "neon-rush";
+export type GameMode = "classic" | "time-trial" | "trick-challenge" | "data-run";
 
 export interface RunResult {
   gameId: GameId;

@@ -1,5 +1,6 @@
 import Phaser from "phaser";
-import type { RunResult } from "../../types";
+import type { GameMode, RunResult } from "../../types";
+import { resolveModeFinish } from "../../lib/gameModes";
 
 interface TrackObject {
   x: number;
@@ -31,6 +32,7 @@ export class NeonRushScene extends Phaser.Scene {
   constructor(
     private readonly equippedItem: string | null = null,
     private readonly controlScheme: "arrows" | "wasd" = "arrows",
+    private readonly mode: GameMode = "classic",
   ) {
     super("NeonRushScene");
   }
@@ -120,7 +122,7 @@ export class NeonRushScene extends Phaser.Scene {
     this.spawnClock += delta;
     if (this.spawnClock > Math.max(480, 1200 - this.elapsed * 9)) {
       this.spawnObject();
-      if (Math.random() > 0.75) this.spawnObject("coin");
+      if (Math.random() > (this.mode === "data-run" ? 0.42 : 0.75)) this.spawnObject("coin");
       this.spawnClock = 0;
     }
 
@@ -158,9 +160,19 @@ export class NeonRushScene extends Phaser.Scene {
     }
     this.objects = this.objects.filter((object) => object.x > -70);
     this.score += delta / 1000 * (16 + this.elapsed * 0.9);
+    const modeFinish = resolveModeFinish("neon-rush", this.mode, this.elapsed, 0, this.coins);
+    if (modeFinish) {
+      this.score += modeFinish.bonusPoints;
+      this.coins += modeFinish.bonusCoins;
+      this.finish(modeFinish.message);
+      return;
+    }
     this.drawWorld();
     const power = this.time.now < this.shieldUntil ? "SHIELD" : this.time.now < this.speedBoostUntil ? "BOOST" : this.time.now < this.magnetUntil ? "MAGNET" : "";
-    this.hud.setText("SCORE  " + Math.floor(this.score) + "     DATA CHIPS  " + this.coins + "     SPEED  " + (1 + this.elapsed / 30).toFixed(1) + "x     " + power);
+    const objective = this.mode === "time-trial"
+      ? "TIME LEFT  " + Math.max(0, 60 - Math.floor(this.elapsed)) + "s"
+      : this.mode === "data-run" ? "CHIPS  " + this.coins + "/12" : "";
+    this.hud.setText("SCORE  " + Math.floor(this.score) + "     DATA CHIPS  " + this.coins + "     SPEED  " + (1 + this.elapsed / 30).toFixed(1) + "x     " + power + "     " + objective);
   }
 
   private drawWorld(): void {
@@ -236,10 +248,10 @@ export class NeonRushScene extends Phaser.Scene {
     g.fillRect(x - 22, 418, 44, 6);
   }
 
-  private finish(): void {
+  private finish(message = "RUN OVER  •  TRY AGAIN"): void {
     if (this.ended) return;
     this.ended = true;
-    this.status.setText("RUN OVER  •  TRY AGAIN");
+    this.status.setText(message);
     const result: RunResult = {
       gameId: "neon-rush",
       score: Math.floor(this.score),

@@ -1,5 +1,6 @@
 import Phaser from "phaser";
-import type { RunResult } from "../../types";
+import type { GameMode, RunResult } from "../../types";
+import { resolveModeFinish } from "../../lib/gameModes";
 
 interface Hazard {
   x: number;
@@ -34,6 +35,7 @@ export class WakeboardScene extends Phaser.Scene {
   constructor(
     private readonly equippedItem: string | null = null,
     private readonly controlScheme: "arrows" | "wasd" = "arrows",
+    private readonly mode: GameMode = "classic",
   ) {
     super("WakeboardScene");
   }
@@ -111,6 +113,13 @@ export class WakeboardScene extends Phaser.Scene {
     if (this.paused) return;
 
     this.elapsed += delta / 1000;
+    const modeFinish = resolveModeFinish("wakeboard-x", this.mode, this.elapsed, this.tricks);
+    if (modeFinish) {
+      this.score += modeFinish.bonusPoints;
+      this.coins += modeFinish.bonusCoins;
+      this.finish(modeFinish.message);
+      return;
+    }
     this.waveOffset += delta * 0.035;
     const speed = 280 + this.elapsed * 5.2;
     const left = this.controlScheme === "arrows" ? this.cursors?.left?.isDown : this.keys?.A?.isDown;
@@ -171,7 +180,10 @@ export class WakeboardScene extends Phaser.Scene {
     this.hazards = this.hazards.filter((hazard) => hazard.x > -80);
     this.score += delta / 1000 * 12;
     this.drawWorld();
-    this.hud.setText("SCORE  " + Math.floor(this.score) + "     COMBO  x" + this.combo + "     COINS  " + this.coins + "     " + Math.floor(this.elapsed) + "s");
+    const objective = this.mode === "time-trial"
+      ? "TIME LEFT  " + Math.max(0, 60 - Math.floor(this.elapsed)) + "s"
+      : this.mode === "trick-challenge" ? "TRICKS  " + this.tricks + "/5" : "FREE RIDE";
+    this.hud.setText("SCORE  " + Math.floor(this.score) + "     COMBO  x" + this.combo + "     COINS  " + this.coins + "     " + objective);
   }
 
   private drawWorld(): void {
@@ -236,10 +248,10 @@ export class WakeboardScene extends Phaser.Scene {
     g.lineBetween(this.playerX + 7, this.playerY + 5 - lift, this.playerX + 18, this.playerY + 18 - lift);
   }
 
-  private finish(): void {
+  private finish(message = "WIPEOUT!  RUN COMPLETE"): void {
     if (this.ended) return;
     this.ended = true;
-    this.status.setText("WIPEOUT!  RUN COMPLETE");
+    this.status.setText(message);
     const result: RunResult = {
       gameId: "wakeboard-x",
       score: Math.floor(this.score),

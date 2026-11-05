@@ -60,3 +60,12 @@ Progress is saved in this browser using localStorage. It is local to the current
 ## Current limitations
 
 This is the initial playable foundation, not the full feature set described in the product brief. Online services, cosmetic inventory that changes in-game appearance, full audio, additional environments and the remaining requested game modes remain future work. Local mission rewards and period resets are implemented; no global leaderboard exists. Local personal bests are stored per game; no global leaderboard exists. Settings are persisted; sound playback is not yet connected.
+
+## Game modes
+
+Each game now offers three ways to play:
+
+- **WAKEBOARD X:** Free Ride, a 60-second Time Trial, and a Trick Challenge (land five tricks within 90 seconds).
+- **NEON RUSH:** Endless Run, a 60-second Time Trial, and Data Run (collect 12 chips within 90 seconds).
+
+Mode goals and completion bonuses are handled inside the Phaser scenes and covered by unit tests.
