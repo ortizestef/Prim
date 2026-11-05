@@ -51,7 +51,7 @@ src/
 
 - **WAKEBOARD X:** keyboard and pointer movement, jump/trick timing, ramps, buoys, combo scoring and landing rewards.
 - **NEON RUSH:** three-lane runner, lane switching, jumping, collectible data chips, increasing speed and collision/game-over logic.
-- Both games save completed-run XP, coins, achievements and personal bests to the same local player profile.
+- Both games save completed-run XP, coins, achievements, mission progress and personal bests to the same local player profile. Daily and weekly missions award XP and coins once each when claimed.
 
 ## Persistence and privacy
 
@@ -59,4 +59,4 @@ Progress is saved in this browser using localStorage. It is local to the current
 
 ## Current limitations
 
-This is the initial playable foundation, not the full feature set described in the product brief. Daily/weekly mission rotation and claimable rewards, online services, cosmetic inventory that changes in-game appearance, full audio, additional environments, all requested game modes and deployment automation remain future work. Local personal bests are stored per game; no global leaderboard exists. Settings are persisted; sound playback is not yet connected.
+This is the initial playable foundation, not the full feature set described in the product brief. Online services, cosmetic inventory that changes in-game appearance, full audio, additional environments and the remaining requested game modes remain future work. Local mission rewards and period resets are implemented; no global leaderboard exists. Local personal bests are stored per game; no global leaderboard exists. Settings are persisted; sound playback is not yet connected.

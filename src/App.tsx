@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from
 import { HashRouter, NavLink, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import PhaserGame from "./components/PhaserGame";
 import { ACHIEVEMENTS, applyRun, getLevelProgress, currentLevel } from "./lib/progression";
+import { claimMissionReward, getMissionBoard } from "./lib/missions";
 import { loadProfile, saveProfile, xpToNextLevel } from "./lib/storage";
 import type { GameId, PlayerProfile, RunResult } from "./types";
 
@@ -103,7 +104,15 @@ function AppShell() {
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/profile" element={<ProfilePage profile={profile} setProfile={setProfile} />} />
           <Route path="/shop" element={<ShopPage profile={profile} buyItem={buyItem} />} />
-          <Route path="/missions" element={<MissionsPage profile={profile} />} />
+          <Route path="/missions" element={<MissionsPage profile={profile} onClaim={(claimId) => {
+            const result = claimMissionReward(profile, claimId);
+            if (result.claimed) {
+              setProfile(result.profile);
+              notify("Mission complete · +" + result.rewardXp + " XP · +" + result.rewardCoins + " coins");
+            } else {
+              notify("Complete the mission before claiming its reward.");
+            }
+          }} />} />
           <Route path="/achievements" element={<AchievementsPage profile={profile} />} />
           <Route path="/settings" element={<SettingsPage profile={profile} setProfile={setProfile} />} />
           <Route path="/play/:gameId" element={<PlayPage onFinish={finishRun} profile={profile} />} />
@@ -246,15 +255,49 @@ function ShopPage({ profile, buyItem }: { profile: PlayerProfile; buyItem: (id: 
   return <div className="content-page"><SectionHeading eyebrow="ARCADE STORE / COSMETICS" title="MAKE IT YOURS" detail="A little style goes a long way. Every item is earned with in-game coins." /><div className="shop-wallet"><span>YOUR BALANCE</span><b>◈ {profile.coins}</b></div><div className="shop-grid">{shopItems.map((item) => { const owned = profile.ownedItems.includes(item.id); return <article className="shop-item" key={item.id}><div className="shop-art"><span>{item.symbol}</span><small>{item.category}</small></div><div className="shop-item-info"><div><h3>{item.name}</h3><span>{item.price} COINS</span></div><button className={"button " + (owned ? "button-owned" : "button-outline")} disabled={owned} onClick={() => buyItem(item.id, item.price)}>{owned ? "OWNED ✓" : "UNLOCK"}</button></div></article>; })}</div><p className="subtle-note">Cosmetic inventory is saved locally. No real-money purchases.</p></div>;
 }
 
-function MissionsPage({ profile }: { profile: PlayerProfile }) {
-  const missions = useMemo(() => [
-    { title: "Warm-up lap", detail: "Finish 1 game session.", progress: Math.min(profile.gamesPlayed, 1), target: 1, reward: "50 XP" },
-    { title: "Getting warmed up", detail: "Play 3 game sessions.", progress: Math.min(profile.gamesPlayed, 3), target: 3, reward: "100 XP" },
-    { title: "Pocket change", detail: "Hold 50 coins in your wallet.", progress: Math.min(profile.coins, 50), target: 50, reward: "75 XP" },
-  ], [profile.gamesPlayed, profile.coins]);
-  return <div className="content-page"><SectionHeading eyebrow="OBJECTIVES / PLAYER MISSIONS" title="THE NEXT MILESTONE" detail="Small goals. New reasons to jump back in." /><div className="mission-list">{missions.map((mission) => <div className="mission-card" key={mission.title}><div className="mission-symbol">✧</div><div className="mission-copy"><span className="eyebrow">GENERAL CHALLENGE</span><h3>{mission.title}</h3><p>{mission.detail}</p><div className="progress-track"><i style={{ width: (mission.progress / mission.target * 100) + "%" }} /></div><small>{mission.progress} / {mission.target} COMPLETE</small></div><div className="mission-reward"><small>GOAL REWARD</small><b>{mission.reward}</b></div></div>)}</div><p className="subtle-note">Mission cards currently track progress only; rewards are not claimable yet. Daily and weekly rotations are planned for a future update.</p></div>;
+function MissionsPage({ profile, onClaim }: { profile: PlayerProfile; onClaim: (claimId: string) => void }) {
+  const board = getMissionBoard(profile);
+  const daily = board.filter((mission) => mission.period === "daily");
+  const weekly = board.filter((mission) => mission.period === "weekly");
+  const renderMission = (mission: typeof board[number]) => (
+    <div className={"mission-card " + (mission.completed ? "mission-complete" : "")} key={mission.claimId}>
+      <div className="mission-symbol">{mission.claimed ? "✓" : mission.completed ? "★" : "✧"}</div>
+      <div className="mission-copy">
+        <span className="eyebrow">{mission.period === "daily" ? "DAILY OBJECTIVE" : "WEEKLY CHALLENGE"}</span>
+        <h3>{mission.title}</h3>
+        <p>{mission.description}</p>
+        <div className="progress-track"><i style={{ width: (mission.progress / mission.target * 100) + "%" }} /></div>
+        <small>{mission.progress.toLocaleString()} / {mission.target.toLocaleString()} {mission.completed ? "COMPLETE" : "IN PROGRESS"}</small>
+      </div>
+      <div className="mission-reward">
+        <small>REWARD</small>
+        <b>+{mission.rewardXp} XP</b>
+        <b>◈ {mission.rewardCoins}</b>
+        <button
+          className={"button " + (mission.claimed ? "button-owned" : "button-outline")}
+          disabled={!mission.completed || mission.claimed}
+          onClick={() => onClaim(mission.claimId)}
+        >
+          {mission.claimed ? "CLAIMED ✓" : mission.completed ? "CLAIM" : "IN PROGRESS"}
+        </button>
+      </div>
+    </div>
+  );
+  return (
+    <div className="content-page">
+      <SectionHeading eyebrow="OBJECTIVES / PLAYER MISSIONS" title="THE NEXT MILESTONE" detail="Play, make progress and claim your rewards. Daily goals reset each day; weekly challenges reset on Monday." />
+      <div className="mission-group">
+        <SectionHeading eyebrow="RESETS EVERY DAY" title="DAILY MISSIONS" />
+        <div className="mission-list">{daily.map(renderMission)}</div>
+      </div>
+      <div className="mission-group">
+        <SectionHeading eyebrow="RESETS EVERY MONDAY" title="WEEKLY CHALLENGES" />
+        <div className="mission-list">{weekly.map(renderMission)}</div>
+      </div>
+      <p className="subtle-note">Mission progress and claimed rewards are saved in your local player profile.</p>
+    </div>
+  );
 }
-
 function AchievementsPage({ profile }: { profile: PlayerProfile }) {
   return <div className="content-page"><SectionHeading eyebrow={"TROPHY ROOM / " + profile.achievements.length + " UNLOCKED"} title="PROOF OF PLAY" detail="Earn these through real gameplay milestones." /><div className="achievement-grid">{ACHIEVEMENTS.map((item, index) => { const unlocked = profile.achievements.includes(item.id); return <article className={"achievement-card " + (unlocked ? "unlocked" : "locked")} key={item.id}><div className="achievement-medal">{["✦", "⌁", "〰", "⚡", "◈"][index]}</div><div><span className="eyebrow">{unlocked ? "UNLOCKED" : "LOCKED"}</span><h3>{item.title}</h3><p>{item.detail}</p><small>{item.reward} COINS REWARD</small></div><span className="achievement-state">{unlocked ? "✓" : "—"}</span></article>; })}</div></div>;
 }

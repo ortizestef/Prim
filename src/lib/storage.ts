@@ -1,23 +1,41 @@
 import { DEFAULT_PROFILE, type PlayerProfile } from "../types";
+import { syncMissionWindows } from "./missions";
 
 const STORAGE_KEY = "arcadeverse.profile.v1";
 
 export function loadProfile(): PlayerProfile {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return structuredClone(DEFAULT_PROFILE);
+    if (!raw) return syncMissionWindows(structuredClone(DEFAULT_PROFILE));
 
     const saved = JSON.parse(raw) as Partial<PlayerProfile>;
-    return {
+    const merged: PlayerProfile = {
       ...structuredClone(DEFAULT_PROFILE),
       ...saved,
+      totalCoinsEarned: Number.isFinite(saved.totalCoinsEarned) ? Number(saved.totalCoinsEarned) : 0,
+      totalTricks: Number.isFinite(saved.totalTricks) ? Number(saved.totalTricks) : 0,
+      totalPerfectLandings: Number.isFinite(saved.totalPerfectLandings) ? Number(saved.totalPerfectLandings) : 0,
       bestScores: { ...DEFAULT_PROFILE.bestScores, ...(saved.bestScores ?? {}) },
       settings: { ...DEFAULT_PROFILE.settings, ...(saved.settings ?? {}) },
+      missionProgress: {
+        ...DEFAULT_PROFILE.missionProgress,
+        ...(saved.missionProgress ?? {}),
+        dailyCounters: {
+          ...DEFAULT_PROFILE.missionProgress.dailyCounters,
+          ...(saved.missionProgress?.dailyCounters ?? {}),
+        },
+        weeklyCounters: {
+          ...DEFAULT_PROFILE.missionProgress.weeklyCounters,
+          ...(saved.missionProgress?.weeklyCounters ?? {}),
+        },
+        claimed: Array.isArray(saved.missionProgress?.claimed) ? saved.missionProgress.claimed : [],
+      },
       achievements: Array.isArray(saved.achievements) ? saved.achievements : [],
       ownedItems: Array.isArray(saved.ownedItems) ? saved.ownedItems : [],
     };
+    return syncMissionWindows(merged);
   } catch {
-    return structuredClone(DEFAULT_PROFILE);
+    return syncMissionWindows(structuredClone(DEFAULT_PROFILE));
   }
 }
 
