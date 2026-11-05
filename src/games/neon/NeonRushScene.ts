@@ -18,6 +18,7 @@ export class NeonRushScene extends Phaser.Scene {
   private elapsed = 0;
   private score = 0;
   private coins = 0;
+  private dataChips = 0;
   private spawnClock = 0;
   private jumpUntil = 0;
   private shieldUntil = 0;
@@ -132,6 +133,7 @@ export class NeonRushScene extends Phaser.Scene {
         object.passed = true;
         if (object.kind === "coin") {
           this.coins += 1;
+          this.dataChips += 1;
           this.score += 45;
           this.status.setText("+1 DATA CHIP");
         } else if (object.kind === "power") {
@@ -256,6 +258,7 @@ export class NeonRushScene extends Phaser.Scene {
       gameId: "neon-rush",
       score: Math.floor(this.score),
       coins: this.coins,
+      dataChips: this.dataChips,
       duration: Math.floor(this.elapsed),
     };
     this.game.events.emit("arcadeverse:finish", result);

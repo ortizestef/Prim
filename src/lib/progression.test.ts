@@ -61,6 +61,14 @@ describe("daily and weekly missions", () => {
     expect(board.find((mission) => mission.id === "both-worlds")?.completed).toBe(false);
   });
 
+  it("does not count bonus coins as collected neon data chips", () => {
+    const played = applyRun(structuredClone(DEFAULT_PROFILE), {
+      gameId: "neon-rush", score: 900, coins: 12, dataChips: 4, duration: 40,
+    }, monday);
+    const chipsMission = getMissionBoard(played, monday).find((mission) => mission.id === "neon-chips");
+    expect(chipsMission?.progress).toBe(4);
+  });
+
   it("allows a completed reward to be claimed only once", () => {
     const played = applyRun(structuredClone(DEFAULT_PROFILE), {
       gameId: "wakeboard-x", score: 600, coins: 0, tricks: 2, duration: 25,

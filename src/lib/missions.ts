@@ -150,7 +150,7 @@ function addRun(counters: MissionCounters, result: RunResult): MissionCounters {
     ...counters,
     runs: counters.runs + 1,
     score: counters.score + Math.max(0, Math.floor(result.score)),
-    neonCoins: counters.neonCoins + (result.gameId === "neon-rush" ? Math.max(0, result.coins) : 0),
+    neonCoins: counters.neonCoins + (result.gameId === "neon-rush" ? Math.max(0, result.dataChips ?? result.coins) : 0),
     wakeTricks: counters.wakeTricks + (isWakeboard ? Math.max(0, result.tricks ?? 0) : 0),
     wakeRuns: counters.wakeRuns + (isWakeboard ? 1 : 0),
     neonRuns: counters.neonRuns + (isWakeboard ? 0 : 1),

@@ -5,6 +5,7 @@ export interface RunResult {
   gameId: GameId;
   score: number;
   coins: number;
+  dataChips?: number;
   duration: number;
   tricks?: number;
   perfectLandings?: number;
