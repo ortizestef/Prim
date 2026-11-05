@@ -1,6 +1,6 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { lazy, Suspense, useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { HashRouter, NavLink, Route, Routes, useNavigate, useParams } from "react-router-dom";
-import PhaserGame from "./components/PhaserGame";
+const PhaserGame = lazy(() => import("./components/PhaserGame"));
 import { ACHIEVEMENTS, applyRun, getLevelProgress, currentLevel } from "./lib/progression";
 import { claimMissionReward, getMissionBoard } from "./lib/missions";
 import { loadProfile, saveProfile, xpToNextLevel } from "./lib/storage";
@@ -238,7 +238,7 @@ function PlayPage({ onFinish, profile }: { onFinish: (result: RunResult) => void
     <div className="play-page">
       <div className="play-topline"><button className="back-link" onClick={() => navigate("/library")}>← GAME LIBRARY</button><span className="eyebrow">ARCADE SESSION / {selected.id === "wakeboard-x" ? "01" : "02"}</span><span className="play-wallet">◈ {profile.coins} COINS</span></div>
       <div className={"play-heading " + selected.color}><div><span className="eyebrow">{selected.genre}</span><h1>{selected.name}</h1><p>{selected.description}</p></div><span className="session-badge"><i /> SESSION READY</span></div>
-      <div className="game-stage"><PhaserGame key={selected.id + "-" + session + "-" + (profile.equippedItems[selected.id] ?? "default")} gameId={selected.id as GameId} onFinish={handleFinish} equippedItem={profile.equippedItems[selected.id] ?? null} controlScheme={profile.settings.controlScheme} />
+      <div className="game-stage"><Suspense fallback={<div className="game-loading"><span className="loading-pulse" /> LOADING ARCADE ENGINE</div>}><PhaserGame key={selected.id + "-" + session + "-" + (profile.equippedItems[selected.id] ?? "default")} gameId={selected.id as GameId} onFinish={handleFinish} equippedItem={profile.equippedItems[selected.id] ?? null} controlScheme={profile.settings.controlScheme} /></Suspense>
         {finished && lastResult && <div className="result-overlay"><div className="result-panel"><span className="eyebrow">SESSION COMPLETE</span><h2>RUN IT BACK.</h2><div className="result-score">{lastResult.score.toLocaleString()}<small>POINTS</small></div><div className="result-rewards"><span>+{Math.max(20, Math.floor(lastResult.score / 8))} XP</span><span>+{lastResult.coins + Math.floor(lastResult.score / 180)} COINS</span></div><button className="button button-primary" onClick={replay}>PLAY AGAIN ↗</button><button className="button button-quiet" onClick={() => navigate("/profile")}>VIEW PROGRESS</button></div></div>}
       </div>
       <div className="controls-line"><span>⌨ CONTROLS</span><p>{selected.controls}</p><span>ESC TO PAUSE</span></div>
