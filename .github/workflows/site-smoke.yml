@@ -1,12 +1,11 @@
 name: Check live Arcadeverse website
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - Publish ARCADEVERSE to GitHub Pages
+    types: [completed]
     branches: [main]
-    paths:
-      - "index.html"
-      - "assets/**"
-      - ".nojekyll"
   workflow_dispatch:
 
 permissions:
@@ -15,6 +14,7 @@ permissions:
 
 jobs:
   live-site-smoke-test:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Inspect GitHub Pages configuration
@@ -29,25 +29,30 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/ortizestef/Prim/pages")"
           echo "GitHub Pages settings API status: $status"
+          test "$status" = "200"
           cat /tmp/pages-config.json
           echo
+          jq -e '.build_type == "workflow" and .public == true' /tmp/pages-config.json >/dev/null
 
-      - name: Fetch the public homepage and its bundles
+      - name: Fetch the public homepage and verify its bundles
         shell: bash
         run: |
           set -euo pipefail
           SITE_URL="https://ortizestef.github.io/Prim/"
-          status="$(curl --silent --show-error --location --max-time 20 --output /tmp/arcadeverse-index.html --write-out '%{http_code}' "$SITE_URL")"
-          echo "Public homepage HTTP status: $status"
-          echo "Public homepage HTML:"
-          sed -n '1,80p' /tmp/arcadeverse-index.html
+          READY=false
+          for attempt in $(seq 1 18); do
+            status="$(curl --silent --show-error --location --max-time 20 \
+              --output /tmp/arcadeverse-index.html --write-out '%{http_code}' \
+              "${SITE_URL}?check=${GITHUB_RUN_ID}")"
+            if [[ "$status" = "200" ]] && grep -q "/Prim/assets/index-" /tmp/arcadeverse-index.html; then
+              READY=true
+              break
+            fi
+            echo "Waiting for the new Pages deployment (attempt $attempt/18, HTTP $status)."
+            sleep 5
+          done
 
-          test "$status" = "200"
-          test -s /tmp/arcadeverse-index.html
-          if ! grep -q "/Prim/assets/index-" /tmp/arcadeverse-index.html; then
-            echo "The live site is not serving the compiled Vite index."
-            exit 1
-          fi
+          test "$READY" = "true"
           if grep -q "/src/main.tsx" /tmp/arcadeverse-index.html; then
             echo "The published page still points to the development entry point."
             exit 1
@@ -60,4 +65,4 @@ jobs:
 
           curl --fail --silent --show-error --location "https://ortizestef.github.io$JS_PATH" -o /dev/null
           curl --fail --silent --show-error --location "https://ortizestef.github.io$CSS_PATH" -o /dev/null
-          echo "Live website and its JavaScript/CSS bundles are responding."
+          echo "Live website, JavaScript and CSS bundles are responding."
