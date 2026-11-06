@@ -31,6 +31,8 @@ Every push to `main` that changes the app or build configuration triggers `.gith
 
 The live site is: https://ortizestef.github.io/Prim/
 
+The production HTML and hashed JavaScript/CSS assets are committed to the Pages root after each successful build. The generated root HTML is checked to make sure it does not point at the uncompiled development entry point.
+
 The app uses hash-based navigation so its screens work on GitHub Pages. For another repository name, update the base path in `vite.config.ts`.
 
 ## Project structure
