@@ -1,0 +1,46 @@
+name: Check live Arcadeverse website
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "assets/**"
+      - ".nojekyll"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-site-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch the public homepage
+        shell: bash
+        run: |
+          set -euo pipefail
+          SITE_URL="https://ortizestef.github.io/Prim/"
+          for attempt in $(seq 1 18); do
+            if curl --fail --silent --show-error --location --max-time 20 "$SITE_URL" -o /tmp/arcadeverse-index.html; then
+              break
+            fi
+            echo "The public page is not ready yet (attempt $attempt/18)."
+            sleep 5
+          done
+
+          test -s /tmp/arcadeverse-index.html
+          grep -q "/Prim/assets/index-" /tmp/arcadeverse-index.html
+          if grep -q "/src/main.tsx" /tmp/arcadeverse-index.html; then
+            echo "The published page still points to the development entry point."
+            exit 1
+          fi
+
+          JS_PATH="$(grep -oE 'src="/Prim/assets/index-[^"]+\.js"' /tmp/arcadeverse-index.html | head -n 1 | cut -d '"' -f 2)"
+          CSS_PATH="$(grep -oE 'href="/Prim/assets/index-[^"]+\.css"' /tmp/arcadeverse-index.html | head -n 1 | cut -d '"' -f 2)"
+          test -n "$JS_PATH"
+          test -n "$CSS_PATH"
+
+          curl --fail --silent --show-error --location "https://ortizestef.github.io$JS_PATH" -o /dev/null
+          curl --fail --silent --show-error --location "https://ortizestef.github.io$CSS_PATH" -o /dev/null
+          echo "Live website and its JavaScript/CSS bundles are responding."
