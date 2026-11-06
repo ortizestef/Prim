@@ -1,39 +1,33 @@
-name: Build and publish Arcadeverse site
+name: Publish ARCADEVERSE to GitHub Pages
 
 on:
   push:
     branches: [main]
-    paths:
-      - "src/**"
-      - "web/**"
-      - "vite.config.ts"
-      - "tsconfig.json"
-      - "package.json"
-      - "vitest.config.ts"
-      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 concurrency:
-  group: arcadeverse-static-site
+  group: github-pages
   cancel-in-progress: true
 
 jobs:
-  build-and-publish:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out main
+      - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
 
       - name: Install dependencies
         run: npm install
@@ -45,30 +39,30 @@ jobs:
         run: npm run build
 
       - name: Verify production output
+        shell: bash
         run: |
+          set -euo pipefail
           test -s dist/index.html
           test -d dist/assets
-          grep -q "/Prim/assets/" dist/index.html
+          grep -q "/Prim/assets/index-" dist/index.html
           if grep -q "/src/main.tsx" dist/index.html; then
-            echo "Development entry point found in production HTML."
+            echo "The production HTML still contains the development entry point."
             exit 1
           fi
+          echo "Production HTML and static bundles are ready for GitHub Pages."
 
-      - name: Publish compiled website to the Pages branch root
-        run: |
-          rm -rf assets
-          mkdir -p assets
-          cp -R dist/assets/. assets/
-          cp dist/index.html index.html
-          touch .nojekyll
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html assets .nojekyll
-
-          if git diff --cached --quiet; then
-            echo "Published website is already up to date."
-          else
-            git commit -m "chore: publish compiled Arcadeverse site [skip ci]"
-            git push origin HEAD:main
-          fi
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
