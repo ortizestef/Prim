@@ -25,13 +25,13 @@ npm run build
 
 ## GitHub Pages deployment
 
-Vite is configured for this repository path: /Prim/.
+The live site is published from the repository root because this repository's Pages setting uses branch-based deployment. The source HTML lives in `web/index.html`; Vite builds it into a browser-ready `dist/index.html`.
 
-~~~bash
-npm run build
-~~~
+Every push to `main` that changes the app or build configuration triggers `.github/workflows/pages.yml`. That workflow runs the tests, builds the app, verifies the production HTML and copies the compiled HTML and assets to the Pages root. A `.nojekyll` file tells Pages to serve the generated JavaScript and CSS assets directly.
 
-To publish, open repository Settings → Pages and select GitHub Actions as the source. Then open Actions → Publish GitHub Pages → Run workflow. The workflow builds the app, runs its tests and publishes the dist directory. The app uses hash-based navigation so nested screens work on GitHub Pages. For another repository name, update the base path in vite.config.ts.
+The live site is: https://ortizestef.github.io/Prim/
+
+The app uses hash-based navigation so its screens work on GitHub Pages. For another repository name, update the base path in `vite.config.ts`.
 
 ## Project structure
 
