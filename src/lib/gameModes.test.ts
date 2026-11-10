@@ -12,15 +12,15 @@ describe("arcade game modes", () => {
     });
   });
 
-  it("requires five landed tricks before the trick challenge can finish", () => {
-    expect(resolveModeFinish("wakeboard-x", "trick-challenge", 45, 4)).toBeNull();
-    expect(resolveModeFinish("wakeboard-x", "trick-challenge", 45, 5)).toEqual({
-      message: "TRICK CHALLENGE COMPLETE!", bonusPoints: 650, bonusCoins: 10,
+  it("requires 12 seashells before the beachcomber route completes", () => {
+    expect(resolveModeFinish("wakeboard-x", "shell-collector", 45, 0, 11)).toBeNull();
+    expect(resolveModeFinish("wakeboard-x", "shell-collector", 45, 0, 12)).toEqual({
+      message: "BEACHCOMBER ROUTE COMPLETE!", bonusPoints: 650, bonusCoins: 10,
     });
   });
 
-  it("ends an unfinished trick challenge at 90 seconds", () => {
-    expect(resolveModeFinish("wakeboard-x", "trick-challenge", 90, 2)?.message).toBe("TIME UP - TRY AGAIN!");
+  it("ends an unfinished shell route at 90 seconds", () => {
+    expect(resolveModeFinish("wakeboard-x", "shell-collector", 90, 0, 4)?.message).toBe("ROUTE TIME UP!");
   });
 
   it("rewards a completed neon time trial", () => {

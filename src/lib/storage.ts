@@ -15,6 +15,8 @@ export function loadProfile(): PlayerProfile {
       totalCoinsEarned: Number.isFinite(saved.totalCoinsEarned) ? Number(saved.totalCoinsEarned) : 0,
       totalTricks: Number.isFinite(saved.totalTricks) ? Number(saved.totalTricks) : 0,
       totalPerfectLandings: Number.isFinite(saved.totalPerfectLandings) ? Number(saved.totalPerfectLandings) : 0,
+      totalShellsEarned: Number.isFinite(saved.totalShellsEarned) ? Number(saved.totalShellsEarned) : 0,
+      totalCoastlineDistance: Number.isFinite(saved.totalCoastlineDistance) ? Number(saved.totalCoastlineDistance) : 0,
       bestScores: { ...DEFAULT_PROFILE.bestScores, ...(saved.bestScores ?? {}) },
       settings: { ...DEFAULT_PROFILE.settings, ...(saved.settings ?? {}) },
       missionProgress: {

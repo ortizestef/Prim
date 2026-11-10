@@ -69,3 +69,48 @@
 .game-pause-toggle:hover{border-color:rgba(114,240,210,.85);background:rgba(17,54,64,.95)}
 .game-pause-toggle[aria-pressed="true"]{background:rgba(114,240,210,.92);border-color:#72f0d2;color:#09212a}
 @media(max-width:680px){.game-pause-toggle{top:8px;right:8px;min-width:70px;padding:9px 10px;font-size:9px}}
+
+
+/* COASTLINE SKATE — immersive third-person 3D beach ride */
+.ocean .game-art{background:linear-gradient(180deg,#8dcbd6 0%,#c6d8c9 43%,#e9c99c 44%,#cfab79 100%)}
+.ocean .art-grid{opacity:.16;background-size:64px 64px}
+.ocean .game-art-icon{font-size:67px;right:8%;top:15%;filter:drop-shadow(0 12px 9px rgba(22,40,38,.32))}
+.ocean .sun-disc{width:86px;height:86px;right:18%;top:22px;background:linear-gradient(140deg,#fff0c5,#efb078);box-shadow:0 0 40px rgba(255,226,170,.32)}
+.ocean .wave{border-color:rgba(238,251,235,.6);height:74px}
+.ocean .wave-one{bottom:-30px}.ocean .wave-two{bottom:-52px}
+.ocean .wakeboarder{left:42%;bottom:47px;background:#4e3b31;width:9px;height:9px;box-shadow:0 15px 0 6px #315c59,1px 26px 0 2px #e7e1ce}
+.beach-skate-shell{position:relative;width:100%;height:100%;min-height:320px;background:#b6d6da;overflow:hidden}
+.beach-skate-viewport{position:absolute;inset:0}
+.beach-skate-canvas{display:block;width:100%;height:100%;outline:none}
+.beach-skate-hud{position:absolute;inset:13px 14px auto 14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;pointer-events:none}
+.beach-hud-brand,.beach-hud-stats{background:rgba(12,30,34,.74);border:1px solid rgba(239,246,230,.22);border-radius:8px;backdrop-filter:blur(10px);box-shadow:0 8px 22px rgba(27,39,35,.15)}
+.beach-hud-brand{padding:10px 13px;display:grid;gap:4px}
+.beach-hud-brand span{font:800 18px "Barlow Condensed",sans-serif;letter-spacing:1.5px;color:#fff5dc}
+.beach-hud-brand small{font-size:8px;letter-spacing:1.5px;color:#c1d8d0}
+.beach-hud-stats{display:flex;gap:0;padding:9px 10px}
+.beach-hud-stats>div{min-width:64px;padding:0 10px;display:grid;gap:3px;border-right:1px solid rgba(233,240,225,.16)}
+.beach-hud-stats>div:last-child{border:0}
+.beach-hud-stats small{font-size:7px;letter-spacing:1.1px;color:#c2d7ce}
+.beach-hud-stats strong{font:700 17px "Barlow Condensed",sans-serif;color:#fff6e0}
+.beach-pause-button{position:absolute;top:74px;right:15px;z-index:5;border:1px solid rgba(245,249,234,.35);border-radius:6px;padding:8px 13px;background:rgba(12,30,34,.78);color:#fff6e0;font:700 9px "DM Sans",sans-serif;letter-spacing:1.2px;backdrop-filter:blur(8px)}
+.beach-pause-button:hover{background:rgba(28,66,62,.9);border-color:#f1d8a3}
+.beach-pause-layer{position:absolute;inset:0;z-index:7;display:grid;place-content:center;justify-items:center;gap:16px;background:rgba(13,30,34,.43);backdrop-filter:blur(5px)}
+.beach-pause-layer span{font:800 34px "Barlow Condensed",sans-serif;letter-spacing:2px;color:#fff5dc;text-shadow:0 4px 20px rgba(0,0,0,.24)}
+.beach-pause-layer button{border:0;border-radius:6px;padding:12px 18px;background:#f1d39d;color:#283a38;font:800 10px "DM Sans",sans-serif;letter-spacing:1px}
+.beach-skate-touch-controls{display:none}
+.beach-webgl-fallback{position:absolute;inset:0;z-index:8;display:grid;align-content:center;justify-items:center;gap:12px;padding:28px;background:linear-gradient(145deg,#a8d0d3,#ead4ad);color:#243b39;text-align:center}
+.beach-webgl-fallback strong{font:900 28px "Barlow Condensed",sans-serif;letter-spacing:1.5px}
+.beach-webgl-fallback span{max-width:360px;font-size:12px;line-height:1.7}
+@media(max-width:760px){
+ .beach-skate-hud{inset:8px 8px auto 8px;flex-direction:column;align-items:stretch}
+ .beach-hud-brand{align-self:flex-start;padding:7px 10px}
+ .beach-hud-brand span{font-size:16px}
+ .beach-hud-stats{align-self:stretch;justify-content:space-around;padding:7px 4px}
+ .beach-hud-stats>div{min-width:0;flex:1;padding:0 7px}
+ .beach-hud-stats strong{font-size:15px}
+ .beach-pause-button{top:auto;right:9px;bottom:78px}
+ .beach-skate-touch-controls{display:flex;position:absolute;z-index:6;bottom:7px;left:8px;right:8px;justify-content:space-between;gap:6px}
+ .beach-skate-touch-controls button{min-width:48px;min-height:42px;border:1px solid rgba(241,241,223,.42);border-radius:8px;background:rgba(17,39,40,.84);color:#fff4da;font:800 12px "DM Sans",sans-serif;touch-action:none;backdrop-filter:blur(8px)}
+ .beach-skate-touch-controls .beach-push-button{background:rgba(235,205,154,.94);color:#243c39;border-color:#f3d8a9;min-width:68px}
+ .beach-pause-layer span{font-size:27px}
+}

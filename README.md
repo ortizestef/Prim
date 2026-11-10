@@ -49,7 +49,7 @@ src/
 
 ## Current gameplay
 
-- **WAKEBOARD X:** configurable arrow-key/WASD steering, touch movement buttons, jump/trick timing, ramps, buoys, combo scoring, landing rewards and equipable board cosmetics.
+- **COASTLINE SKATE:** a Three.js third-person beach boardwalk ride with a detailed 3D skateboard, a human rider model, animated wheels, ocean waves, sand, palms, beach furniture, seashell collectibles, smooth steering, acceleration/braking and touch controls.
 - **NEON RUSH:** configurable lane controls, mobile touch buttons, jumping, collectible data chips, power-ups, increasing speed, collision/game-over logic and equipable runner cosmetics.
 - Both games save completed-run XP, coins, achievements, mission progress, lifetime coin/trick statistics and personal bests to the same local player profile. Daily and weekly missions award XP and coins once each when claimed. Owned cosmetic items can be equipped for their matching game. Both games can be paused and resumed with Escape or the in-game PAUSE/RESUME button; lane movement and mobile controls are locked while paused or after a run ends.
 
@@ -65,7 +65,7 @@ This is an evolving playable foundation, not the full feature set described in t
 
 Each game now offers three ways to play:
 
-- **WAKEBOARD X:** Free Ride, a 60-second Time Trial, and a Trick Challenge (land five tricks within 90 seconds).
+- **COASTLINE SKATE:** Beach Cruise (90 seconds), Golden Hour (60 seconds), and Shell Collector (collect 12 seashells).
 - **NEON RUSH:** Endless Run, a 60-second Time Trial, and Data Run (collect 12 chips within 90 seconds).
 
 Mode goals and completion bonuses are handled inside the Phaser scenes and covered by unit tests.

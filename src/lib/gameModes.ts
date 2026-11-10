@@ -8,9 +8,9 @@ export interface GameModeOption {
 
 export const GAME_MODE_OPTIONS: Record<GameId, GameModeOption[]> = {
   "wakeboard-x": [
-    { id: "classic", name: "Free Ride", description: "Ride the wake for as long as you can." },
-    { id: "time-trial", name: "60-Second Sprint", description: "Survive the full minute and earn a finish bonus." },
-    { id: "trick-challenge", name: "Trick Challenge", description: "Land 5 tricks within 90 seconds." },
+    { id: "classic", name: "Beach Cruise", description: "Enjoy a relaxed 90-second ride along the promenade." },
+    { id: "time-trial", name: "Golden Hour", description: "Build your distance and score in a 60-second coastal run." },
+    { id: "shell-collector", name: "Shell Collector", description: "Collect 12 seashells along the boardwalk before time runs out." },
   ],
   "neon-rush": [
     { id: "classic", name: "Endless Run", description: "Dodge barriers and chase your personal best." },
@@ -36,12 +36,12 @@ export function resolveModeFinish(
     if (mode === "time-trial" && elapsedSeconds >= 60) {
       return { message: "TIME TRIAL COMPLETE!", bonusPoints: 500, bonusCoins: 5 };
     }
-    if (mode === "trick-challenge") {
-      if (tricks >= 5) {
-        return { message: "TRICK CHALLENGE COMPLETE!", bonusPoints: 650, bonusCoins: 10 };
+    if (mode === "shell-collector") {
+      if (dataChips >= 12) {
+        return { message: "BEACHCOMBER ROUTE COMPLETE!", bonusPoints: 650, bonusCoins: 10 };
       }
       if (elapsedSeconds >= 90) {
-        return { message: "TIME UP - TRY AGAIN!", bonusPoints: 0, bonusCoins: 0 };
+        return { message: "ROUTE TIME UP!", bonusPoints: 0, bonusCoins: 0 };
       }
     }
   }

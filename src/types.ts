@@ -1,5 +1,5 @@
 export type GameId = "wakeboard-x" | "neon-rush";
-export type GameMode = "classic" | "time-trial" | "trick-challenge" | "data-run";
+export type GameMode = "classic" | "time-trial" | "trick-challenge" | "data-run" | "shell-collector";
 
 export interface RunResult {
   gameId: GameId;
@@ -9,6 +9,8 @@ export interface RunResult {
   duration: number;
   tricks?: number;
   perfectLandings?: number;
+  shells?: number;
+  distance?: number;
 }
 
 export interface PlayerSettings {
@@ -23,6 +25,7 @@ export interface MissionCounters {
   score: number;
   neonCoins: number;
   wakeTricks: number;
+  wakeShells: number;
   wakeRuns: number;
   neonRuns: number;
 }
@@ -42,6 +45,8 @@ export interface PlayerProfile {
   totalCoinsEarned: number;
   totalTricks: number;
   totalPerfectLandings: number;
+  totalShellsEarned: number;
+  totalCoastlineDistance: number;
   gamesPlayed: number;
   bestScores: Record<GameId, number>;
   achievements: string[];
@@ -56,6 +61,7 @@ export const EMPTY_MISSION_COUNTERS: MissionCounters = {
   score: 0,
   neonCoins: 0,
   wakeTricks: 0,
+  wakeShells: 0,
   wakeRuns: 0,
   neonRuns: 0,
 };
@@ -67,6 +73,8 @@ export const DEFAULT_PROFILE: PlayerProfile = {
   totalCoinsEarned: 0,
   totalTricks: 0,
   totalPerfectLandings: 0,
+  totalShellsEarned: 0,
+  totalCoastlineDistance: 0,
   gamesPlayed: 0,
   bestScores: { "wakeboard-x": 0, "neon-rush": 0 },
   achievements: [],

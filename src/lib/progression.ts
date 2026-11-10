@@ -4,11 +4,11 @@ import { recordMissionRun, syncMissionWindows } from "./missions";
 
 export const ACHIEVEMENTS = [
   { id: "first-game", title: "First Steps", detail: "Finish your first game.", reward: 50 },
-  { id: "perfect-landing", title: "Clean Landing", detail: "Land a trick in WAKEBOARD X.", reward: 75 },
-  { id: "trick-master", title: "Trick Master", detail: "Land three tricks in one run.", reward: 120 },
+  { id: "perfect-landing", title: "Coastal Explorer", detail: "Ride at least 100 metres along the coast.", reward: 75 },
+  { id: "trick-master", title: "Beachcomber", detail: "Collect 12 seashells in one ride.", reward: 120 },
   { id: "speed-demon", title: "Speed Demon", detail: "Score 1,000 in NEON RUSH.", reward: 100 },
   { id: "coin-collector", title: "Coin Collector", detail: "Earn 100 coins from gameplay.", reward: 100 },
-  { id: "wakeboard-champion", title: "Wakeboard Champion", detail: "Score 2,500 in WAKEBOARD X.", reward: 150 },
+  { id: "wakeboard-champion", title: "Coastline Champion", detail: "Score 2,500 in COASTLINE SKATE.", reward: 150 },
   { id: "neon-survivor", title: "Neon Survivor", detail: "Stay in NEON RUSH for 60 seconds.", reward: 150 },
 ] as const;
 
@@ -30,8 +30,8 @@ export function applyRun(profile: PlayerProfile, result: RunResult, now = new Da
   };
 
   unlock("first-game");
-  if (result.gameId === "wakeboard-x" && (result.perfectLandings ?? 0) > 0) unlock("perfect-landing");
-  if (result.gameId === "wakeboard-x" && (result.tricks ?? 0) >= 3) unlock("trick-master");
+  if (result.gameId === "wakeboard-x" && (result.distance ?? 0) >= 100) unlock("perfect-landing");
+  if (result.gameId === "wakeboard-x" && (result.shells ?? 0) >= 12) unlock("trick-master");
   if (result.gameId === "wakeboard-x" && result.score >= 2500) unlock("wakeboard-champion");
   if (result.gameId === "neon-rush" && result.score >= 1000) unlock("speed-demon");
   if (result.gameId === "neon-rush" && result.duration >= 60) unlock("neon-survivor");
@@ -49,6 +49,8 @@ export function applyRun(profile: PlayerProfile, result: RunResult, now = new Da
     totalCoinsEarned,
     totalTricks: current.totalTricks + (result.gameId === "wakeboard-x" ? Math.max(0, result.tricks ?? 0) : 0),
     totalPerfectLandings: current.totalPerfectLandings + (result.gameId === "wakeboard-x" ? Math.max(0, result.perfectLandings ?? 0) : 0),
+    totalShellsEarned: current.totalShellsEarned + (result.gameId === "wakeboard-x" ? Math.max(0, result.shells ?? 0) : 0),
+    totalCoastlineDistance: current.totalCoastlineDistance + (result.gameId === "wakeboard-x" ? Math.max(0, result.distance ?? 0) : 0),
     gamesPlayed: current.gamesPlayed + 1,
     bestScores,
     achievements: [...achievements],

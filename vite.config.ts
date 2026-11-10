@@ -12,6 +12,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           "phaser-engine": ["phaser"],
+          "three-engine": ["three"],
           "react-vendor": ["react", "react-dom", "react-router-dom"],
         },
       },

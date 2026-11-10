@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { HashRouter, NavLink, Route, Routes, useNavigate, useParams } from "react-router-dom";
-const PhaserGame = lazy(() => import("./components/PhaserGame"));
+const ArcadeGame = lazy(() => import("./components/ArcadeGame"));
 import { ACHIEVEMENTS, applyRun, getLevelProgress, currentLevel } from "./lib/progression";
 import { claimMissionReward, getMissionBoard } from "./lib/missions";
 import { loadProfile, saveProfile, xpToNextLevel } from "./lib/storage";
@@ -10,13 +10,13 @@ import { GAME_MODE_OPTIONS } from "./lib/gameModes";
 const games = [
   {
     id: "wakeboard-x" as const,
-    name: "WAKEBOARD X",
-    subtitle: "Own the ocean.",
-    genre: "SPORTS / TRICK ARCADE",
-    description: "Carve through turquoise water, catch the wake and land the cleanest tricks.",
+    name: "COASTLINE SKATE",
+    subtitle: "Ride the shoreline.",
+    genre: "BEACH SKATE / REAL-TIME 3D",
+    description: "Cruise a detailed seaside boardwalk on a three-dimensional skateboard, collect shells and enjoy the coast.",
     color: "ocean",
-    icon: "〰",
-    controls: "Arrow keys / WASD to move · Space to jump · Z or X for tricks",
+    icon: "🛹",
+    controls: "← / → or A / D to steer · ↑ / W or Space to push · ↓ / S to brake",
   },
   {
     id: "neon-rush" as const,
@@ -31,8 +31,8 @@ const games = [
 ];
 
 const shopItems = [
-  { id: "aqua-trail", name: "Aqua Trail", category: "WAKEBOARD X", gameId: "wakeboard-x" as const, price: 120, symbol: "〰" },
-  { id: "solar-board", name: "Solar Board", category: "WAKEBOARD X", gameId: "wakeboard-x" as const, price: 180, symbol: "▱" },
+  { id: "aqua-trail", name: "Aqua Trail", category: "COASTLINE SKATE", gameId: "wakeboard-x" as const, price: 120, symbol: "〰" },
+  { id: "solar-board", name: "Solar Board", category: "COASTLINE SKATE", gameId: "wakeboard-x" as const, price: 180, symbol: "▱" },
   { id: "synth-glow", name: "Synth Glow", category: "NEON RUSH", gameId: "neon-rush" as const, price: 150, symbol: "✦" },
   { id: "pixel-wings", name: "Pixel Wings", category: "NEON RUSH", gameId: "neon-rush" as const, price: 220, symbol: "⌁" },
 ];
@@ -222,6 +222,12 @@ function PlayPage({ onFinish, profile }: { onFinish: (result: RunResult) => void
   const [lastResult, setLastResult] = useState<RunResult | null>(null);
   const [mode, setMode] = useState<GameMode>("classic");
 
+  useEffect(() => {
+    setMode("classic");
+    setFinished(false);
+    setLastResult(null);
+  }, [gameId]);
+
   if (!selected) return <div className="content-page"><h2>Game not found.</h2><button className="button button-primary" onClick={() => navigate("/library")}>BACK TO LIBRARY</button></div>;
 
   const availableModes = GAME_MODE_OPTIONS[selected.id];
@@ -247,7 +253,7 @@ function PlayPage({ onFinish, profile }: { onFinish: (result: RunResult) => void
         <div className="mode-selector-heading"><span className="eyebrow">SELECT YOUR CHALLENGE</span><small>Each mode has its own goal.</small></div>
         <div className="mode-options">{availableModes.map((item) => <button type="button" key={item.id} className={"mode-option " + (selectedMode.id === item.id ? "is-selected" : "")} aria-pressed={selectedMode.id === item.id} onClick={() => { setMode(item.id); setFinished(false); setLastResult(null); }}><b>{item.name}</b><small>{item.description}</small></button>)}</div>
       </section>
-      <div className="game-stage"><Suspense fallback={<div className="game-loading"><span className="loading-pulse" /> LOADING ARCADE ENGINE</div>}><PhaserGame key={selected.id + "-" + selectedMode.id + "-" + session + "-" + (profile.equippedItems[selected.id] ?? "default")} gameId={selected.id as GameId} mode={selectedMode.id} onFinish={handleFinish} equippedItem={profile.equippedItems[selected.id] ?? null} controlScheme={profile.settings.controlScheme} /></Suspense>
+      <div className="game-stage"><Suspense fallback={<div className="game-loading"><span className="loading-pulse" /> LOADING ARCADE ENGINE</div>}><ArcadeGame key={selected.id + "-" + selectedMode.id + "-" + session + "-" + (profile.equippedItems[selected.id] ?? "default")} gameId={selected.id as GameId} mode={selectedMode.id} onFinish={handleFinish} equippedItem={profile.equippedItems[selected.id] ?? null} controlScheme={profile.settings.controlScheme} /></Suspense>
         {finished && lastResult && <div className="result-overlay"><div className="result-panel"><span className="eyebrow">{selectedMode.name.toUpperCase()} / SESSION ENDED</span><h2>RUN IT BACK.</h2><div className="result-score">{lastResult.score.toLocaleString()}<small>POINTS</small></div><div className="result-rewards"><span>+{Math.max(20, Math.floor(lastResult.score / 8))} XP</span><span>+{lastResult.coins + Math.floor(lastResult.score / 180)} COINS</span></div><button className="button button-primary" onClick={replay}>PLAY AGAIN ↗</button><button className="button button-quiet" onClick={() => navigate("/profile")}>VIEW PROGRESS</button></div></div>}
       </div>
       <div className="controls-line"><span>⌨ CONTROLS</span><p>{selected.controls}</p><span>ESC TO PAUSE</span></div>
@@ -266,12 +272,12 @@ function ProfilePage({ profile, setProfile }: { profile: PlayerProfile; setProfi
     <div className="profile-stat-grid">
       <StatBox label="GAMES PLAYED" value={profile.gamesPlayed.toString()} />
       <StatBox label="COINS EARNED" value={profile.totalCoinsEarned.toLocaleString()} />
-      <StatBox label="TRICKS LANDED" value={profile.totalTricks.toLocaleString()} />
-      <StatBox label="PERFECT LANDINGS" value={profile.totalPerfectLandings.toLocaleString()} />
-      <StatBox label="WAKEBOARD X BEST" value={profile.bestScores["wakeboard-x"].toLocaleString()} />
+      <StatBox label="SHELLS COLLECTED" value={profile.totalShellsEarned.toLocaleString()} />
+      <StatBox label="COASTLINE DISTANCE" value={profile.totalCoastlineDistance.toLocaleString() + " m"} />
+      <StatBox label="COASTLINE SKATE BEST" value={profile.bestScores["wakeboard-x"].toLocaleString()} />
       <StatBox label="NEON RUSH BEST" value={profile.bestScores["neon-rush"].toLocaleString()} />
     </div>
-    <div className="records-panel"><SectionHeading eyebrow="PERSONAL BESTS" title="YOUR RECORD BOARD" /><div className="record-row"><span className="record-icon ocean-icon">〰</span><span><b>WAKEBOARD X</b><small>Best score</small></span><strong>{profile.bestScores["wakeboard-x"].toLocaleString()}</strong></div><div className="record-row"><span className="record-icon neon-icon">✳</span><span><b>NEON RUSH</b><small>Best score</small></span><strong>{profile.bestScores["neon-rush"].toLocaleString()}</strong></div></div>
+    <div className="records-panel"><SectionHeading eyebrow="PERSONAL BESTS" title="YOUR RECORD BOARD" /><div className="record-row"><span className="record-icon ocean-icon">〰</span><span><b>COASTLINE SKATE</b><small>Best score</small></span><strong>{profile.bestScores["wakeboard-x"].toLocaleString()}</strong></div><div className="record-row"><span className="record-icon neon-icon">✳</span><span><b>NEON RUSH</b><small>Best score</small></span><strong>{profile.bestScores["neon-rush"].toLocaleString()}</strong></div></div>
   </div>;
 }
 

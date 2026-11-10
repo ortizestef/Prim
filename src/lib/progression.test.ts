@@ -33,6 +33,14 @@ describe("player progression", () => {
     expect(next.achievements).toContain("neon-survivor");
   });
 
+  it("stores shells and coastline distance from a completed beach session", () => {
+    const next = applyRun(structuredClone(DEFAULT_PROFILE), {
+      gameId: "wakeboard-x", score: 900, coins: 6, shells: 8, distance: 420, duration: 52,
+    });
+    expect(next.totalShellsEarned).toBe(8);
+    expect(next.totalCoastlineDistance).toBe(420);
+  });
+
   it("counts total coins earned rather than the current wallet", () => {
     const profile = { ...structuredClone(DEFAULT_PROFILE), coins: 0, totalCoinsEarned: 95 };
     const next = applyRun(profile, { gameId: "neon-rush", score: 180, coins: 4, duration: 12 });
@@ -61,6 +69,15 @@ describe("daily and weekly missions", () => {
     expect(board.find((mission) => mission.id === "both-worlds")?.completed).toBe(false);
   });
 
+  it("updates the beach shell mission from shells actually collected", () => {
+    const played = applyRun(structuredClone(DEFAULT_PROFILE), {
+      gameId: "wakeboard-x", score: 1200, coins: 6, shells: 7, distance: 260, duration: 42,
+    }, monday);
+    const mission = getMissionBoard(played, monday).find((item) => item.id === "coast-shells");
+    expect(mission?.progress).toBe(6);
+    expect(mission?.completed).toBe(true);
+  });
+
   it("does not count bonus coins as collected neon data chips", () => {
     const played = applyRun(structuredClone(DEFAULT_PROFILE), {
       gameId: "neon-rush", score: 900, coins: 12, dataChips: 4, duration: 40,
@@ -87,8 +104,8 @@ describe("daily and weekly missions", () => {
     const sunday = new Date(2026, 10, 8, 21, 0, 0);
     const mondayAfter = new Date(2026, 10, 9, 9, 0, 0);
     const played = applyRun(structuredClone(DEFAULT_PROFILE), {
-      gameId: "wakeboard-x", score: 500, coins: 0, duration: 15,
-    });
+      gameId: "wakeboard-x", score: 500, coins: 0, shells: 2, distance: 180, duration: 15,
+    }, sunday);
     const reset = syncMissionWindows(played, mondayAfter);
     expect(reset.missionProgress.dailyCounters.runs).toBe(0);
     expect(reset.missionProgress.weeklyCounters.runs).toBe(0);
