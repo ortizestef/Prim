@@ -36,6 +36,14 @@ export function resolveModeFinish(
     if (mode === "time-trial" && elapsedSeconds >= 60) {
       return { message: "TIME TRIAL COMPLETE!", bonusPoints: 500, bonusCoins: 5 };
     }
+    if (mode === "trick-challenge") {
+      if (tricks >= 5) {
+        return { message: "TRICK CHALLENGE COMPLETE!", bonusPoints: 650, bonusCoins: 10 };
+      }
+      if (elapsedSeconds >= 90) {
+        return { message: "TIME UP - TRY AGAIN!", bonusPoints: 0, bonusCoins: 0 };
+      }
+    }
     if (mode === "shell-collector") {
       if (dataChips >= 12) {
         return { message: "BEACHCOMBER ROUTE COMPLETE!", bonusPoints: 650, bonusCoins: 10 };
