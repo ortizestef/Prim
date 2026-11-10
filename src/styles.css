@@ -62,3 +62,10 @@
 .mode-option b{font-family:"Barlow Condensed",sans-serif;font-size:20px;letter-spacing:.3px}
 .mode-option small{font-size:9px;line-height:1.5;color:#91a9b4}
 @media(max-width:680px){.mode-selector{padding:12px}.mode-selector-heading{align-items:flex-start;flex-direction:column;gap:3px}.mode-options{grid-template-columns:1fr}.mode-option{padding:10px 12px}.mode-option b{font-size:18px}}
+
+
+/* In-game pause control, available on desktop and touch devices */
+.game-pause-toggle{position:absolute;top:12px;right:12px;z-index:9;min-width:76px;padding:8px 11px;border:1px solid rgba(159,226,231,.38);border-radius:6px;background:rgba(5,21,34,.86);color:#dffbf8;font:700 10px "DM Sans",sans-serif;letter-spacing:1px;cursor:pointer;backdrop-filter:blur(8px);touch-action:manipulation}
+.game-pause-toggle:hover{border-color:rgba(114,240,210,.85);background:rgba(17,54,64,.95)}
+.game-pause-toggle[aria-pressed="true"]{background:rgba(114,240,210,.92);border-color:#72f0d2;color:#09212a}
+@media(max-width:680px){.game-pause-toggle{top:8px;right:8px;min-width:70px;padding:9px 10px;font-size:9px}}

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Phaser from "phaser";
 import { WakeboardScene } from "../games/wakeboard/WakeboardScene";
 import { NeonRushScene } from "../games/neon/NeonRushScene";
@@ -22,6 +22,7 @@ export default function PhaserGame({
   const hostRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
   const finishRef = useRef(onFinish);
+  const [paused, setPaused] = useState(false);
   finishRef.current = onFinish;
 
   useEffect(() => {
@@ -46,11 +47,18 @@ export default function PhaserGame({
       scene: [scene],
     });
     gameRef.current = game;
-    const handleFinish = (result: RunResult) => finishRef.current(result);
+    setPaused(false);
+    const handleFinish = (result: RunResult) => {
+      setPaused(false);
+      finishRef.current(result);
+    };
+    const handlePauseChange = (nextPaused: boolean) => setPaused(nextPaused);
     game.events.on("arcadeverse:finish", handleFinish);
+    game.events.on("arcadeverse:pause-changed", handlePauseChange);
 
     return () => {
       game.events.off("arcadeverse:finish", handleFinish);
+      game.events.off("arcadeverse:pause-changed", handlePauseChange);
       game.destroy(true);
       gameRef.current = null;
     };
@@ -67,6 +75,12 @@ export default function PhaserGame({
     else scene.touchTrick(action);
   };
 
+  const togglePause = () => {
+    const sceneKey = gameId === "wakeboard-x" ? "WakeboardScene" : "NeonRushScene";
+    const scene = gameRef.current?.scene.getScene(sceneKey) as WakeboardScene | NeonRushScene | undefined;
+    scene?.togglePause();
+  };
+
   const neonAction = (action: "left" | "right" | "jump") => {
     const scene = gameRef.current?.scene.getScene("NeonRushScene") as NeonRushScene | undefined;
     if (!scene) return;
@@ -78,6 +92,7 @@ export default function PhaserGame({
   return (
     <div className="phaser-game-shell">
       <div className="phaser-host" ref={hostRef} aria-label={gameId + " game canvas"} />
+      <button type="button" className="game-pause-toggle" onClick={togglePause} aria-pressed={paused} aria-label={paused ? "Resume game" : "Pause game"}>{paused ? "RESUME" : "PAUSE"}</button>
       <div className={"touch-controls " + (gameId === "wakeboard-x" ? "wake-touch" : "neon-touch")} aria-label="Touch game controls">
         {gameId === "wakeboard-x" ? (
           <>

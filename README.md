@@ -51,7 +51,7 @@ src/
 
 - **WAKEBOARD X:** configurable arrow-key/WASD steering, touch movement buttons, jump/trick timing, ramps, buoys, combo scoring, landing rewards and equipable board cosmetics.
 - **NEON RUSH:** configurable lane controls, mobile touch buttons, jumping, collectible data chips, power-ups, increasing speed, collision/game-over logic and equipable runner cosmetics.
-- Both games save completed-run XP, coins, achievements, mission progress, lifetime coin/trick statistics and personal bests to the same local player profile. Daily and weekly missions award XP and coins once each when claimed. Owned cosmetic items can be equipped for their matching game.
+- Both games save completed-run XP, coins, achievements, mission progress, lifetime coin/trick statistics and personal bests to the same local player profile. Daily and weekly missions award XP and coins once each when claimed. Owned cosmetic items can be equipped for their matching game. Both games can be paused and resumed with Escape or the in-game PAUSE/RESUME button; lane movement and mobile controls are locked while paused or after a run ends.
 
 ## Persistence and privacy
 

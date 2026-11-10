@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import type { GameMode, RunResult } from "../../types";
 import { resolveModeFinish } from "../../lib/gameModes";
+import { moveRunnerLane, resolveBarrierImpact } from "../../lib/gameplay";
 
 interface TrackObject {
   x: number;
@@ -46,6 +47,13 @@ export class NeonRushScene extends Phaser.Scene {
     this.jump();
   }
 
+  public togglePause(): void {
+    if (this.ended) return;
+    this.paused = !this.paused;
+    this.status.setText(this.paused ? "PAUSED  •  PRESS ESC TO RESUME" : "KEEP MOVING!");
+    this.game.events.emit("arcadeverse:pause-changed", this.paused);
+  }
+
   create(): void {
     this.cameras.main.setBackgroundColor("#090d24");
     this.graphics = this.add.graphics();
@@ -79,7 +87,8 @@ export class NeonRushScene extends Phaser.Scene {
   }
 
   private changeLane(direction: number): void {
-    this.lane = Phaser.Math.Clamp(this.lane + direction, 0, 2);
+    if (this.ended || this.paused) return;
+    this.lane = moveRunnerLane(this.lane, direction);
   }
 
   private jump(): void {
@@ -101,10 +110,7 @@ export class NeonRushScene extends Phaser.Scene {
 
   update(_time: number, delta: number): void {
     if (this.ended) return;
-    if (this.keys?.ESC && Phaser.Input.Keyboard.JustDown(this.keys.ESC)) {
-      this.paused = !this.paused;
-      this.status.setText(this.paused ? "PAUSED  •  PRESS ESC TO RESUME" : "KEEP MOVING!");
-    }
+    if (this.keys?.ESC && Phaser.Input.Keyboard.JustDown(this.keys.ESC)) this.togglePause();
     if (this.paused) return;
 
     this.elapsed += delta / 1000;
@@ -148,7 +154,7 @@ export class NeonRushScene extends Phaser.Scene {
             this.speedBoostUntil = this.time.now + 3500;
             this.status.setText("SPEED BOOST ONLINE");
           }
-        } else if (this.time.now > this.jumpUntil && this.time.now > this.shieldUntil) {
+        } else if (resolveBarrierImpact(this.time.now < this.jumpUntil, this.time.now < this.shieldUntil) === "crash") {
           this.finish();
           return;
         } else {
@@ -162,7 +168,7 @@ export class NeonRushScene extends Phaser.Scene {
     }
     this.objects = this.objects.filter((object) => object.x > -70);
     this.score += delta / 1000 * (16 + this.elapsed * 0.9);
-    const modeFinish = resolveModeFinish("neon-rush", this.mode, this.elapsed, 0, this.coins);
+    const modeFinish = resolveModeFinish("neon-rush", this.mode, this.elapsed, 0, this.dataChips);
     if (modeFinish) {
       this.score += modeFinish.bonusPoints;
       this.coins += modeFinish.bonusCoins;
@@ -173,8 +179,8 @@ export class NeonRushScene extends Phaser.Scene {
     const power = this.time.now < this.shieldUntil ? "SHIELD" : this.time.now < this.speedBoostUntil ? "BOOST" : this.time.now < this.magnetUntil ? "MAGNET" : "";
     const objective = this.mode === "time-trial"
       ? "TIME LEFT  " + Math.max(0, 60 - Math.floor(this.elapsed)) + "s"
-      : this.mode === "data-run" ? "CHIPS  " + this.coins + "/12" : "";
-    this.hud.setText("SCORE  " + Math.floor(this.score) + "     DATA CHIPS  " + this.coins + "     SPEED  " + (1 + this.elapsed / 30).toFixed(1) + "x     " + power + "     " + objective);
+      : this.mode === "data-run" ? "CHIPS  " + this.dataChips + "/12" : "";
+    this.hud.setText("SCORE  " + Math.floor(this.score) + "     DATA CHIPS  " + this.dataChips + "     SPEED  " + (1 + this.elapsed / 30).toFixed(1) + "x     " + power + "     " + objective);
   }
 
   private drawWorld(): void {

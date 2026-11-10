@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import type { GameMode, RunResult } from "../../types";
 import { resolveModeFinish } from "../../lib/gameModes";
+import { resolveWakeboardLanding } from "../../lib/gameplay";
 
 interface Hazard {
   x: number;
@@ -25,7 +26,7 @@ export class WakeboardScene extends Phaser.Scene {
   private perfectLandings = 0;
   private combo = 1;
   private jumpUntil = 0;
-  private trickUntil = 0;
+  private trickPerformed = false;
   private jumping = false;
   private ended = false;
   private paused = false;
@@ -50,9 +51,16 @@ export class WakeboardScene extends Phaser.Scene {
     this.jump();
   }
 
+  public togglePause(): void {
+    if (this.ended) return;
+    this.paused = !this.paused;
+    this.status.setText(this.paused ? "PAUSED  •  PRESS ESC TO RESUME" : "RIDE THE WAKE!");
+    this.game.events.emit("arcadeverse:pause-changed", this.paused);
+  }
+
   public touchTrick(kind: "spin180" | "spin360"): void {
     if (!this.jumping || this.ended || this.paused) return;
-    this.trickUntil = this.time.now + (kind === "spin180" ? 350 : 450);
+    this.trickPerformed = true;
     this.status.setText(kind === "spin180" ? "180° SPIN!" : "360° SPIN!");
   }
 
@@ -91,6 +99,7 @@ export class WakeboardScene extends Phaser.Scene {
   private jump(): void {
     if (!this.jumping && !this.ended && !this.paused) {
       this.jumping = true;
+      this.trickPerformed = false;
       this.jumpUntil = this.time.now + 680;
       this.status.setText("AIRBORNE!  Z / X TO TRICK");
     }
@@ -106,10 +115,7 @@ export class WakeboardScene extends Phaser.Scene {
 
   update(_time: number, delta: number): void {
     if (this.ended) return;
-    if (this.keys?.ESC && Phaser.Input.Keyboard.JustDown(this.keys.ESC)) {
-      this.paused = !this.paused;
-      this.status.setText(this.paused ? "PAUSED  •  PRESS ESC TO RESUME" : "RIDE THE WAKE!");
-    }
+    if (this.keys?.ESC && Phaser.Input.Keyboard.JustDown(this.keys.ESC)) this.togglePause();
     if (this.paused) return;
 
     this.elapsed += delta / 1000;
@@ -139,19 +145,14 @@ export class WakeboardScene extends Phaser.Scene {
 
     if (this.jumping && this.time.now >= this.jumpUntil) {
       this.jumping = false;
-      if (this.trickUntil > 0) {
-        this.tricks += 1;
-        this.perfectLandings += 1;
-        this.score += 250 * this.combo;
-        this.coins += 4;
-        this.combo = Math.min(5, this.combo + 1);
-        this.status.setText("PERFECT LANDING!  +" + (250 * (this.combo - 1)));
-      } else {
-        this.score += 45;
-        this.combo = 1;
-        this.status.setText("NICE JUMP!");
-      }
-      this.trickUntil = 0;
+      const landing = resolveWakeboardLanding(this.trickPerformed, this.combo);
+      this.tricks += landing.tricks;
+      this.perfectLandings += landing.perfectLandings;
+      this.score += landing.score;
+      this.coins += landing.coins;
+      this.combo = landing.nextCombo;
+      this.status.setText(landing.message);
+      this.trickPerformed = false;
     }
 
     this.spawnClock += delta;
